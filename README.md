@@ -25,6 +25,8 @@ Information on packages/ environments will be made available here.
 
 # Usage
 ## Maze_maker.py
+![alt text](./coursework2021-sub1-elliot-hicks/images/plot_example_20x30)
+
 ### Maze production
 ```python Maze_maker.py``` is a module made to create 2D mazes of any shape. maze_maker has three main functions for regualar use:
 1. **make_path()**:
