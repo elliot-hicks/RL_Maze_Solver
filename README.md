@@ -24,16 +24,16 @@ RL_Maze_Solver will demonstrate the ability of reinforcement learning (specifica
 Information on packages/ environments will be made available here.
 
 # Usage
-## Maze_maker.py
-![alt text](./coursework2021-sub1-elliot-hicks/images/plot_example_20x30)
+## ```Maze_maker.py```
+![alt text](https://github.com/mpags-python/coursework2021-sub1-elliot-hicks/blob/main/plot_example_20x30.png)
 
 ### Maze production
-```python Maze_maker.py``` is a module made to create 2D mazes of any shape. maze_maker has three main functions for regualar use:
-1. **make_path()**:
-2. **fill_walls()**:
-3. **create_maze()**: key vars: 
-  1. **shape** (tuple , DEFUALT = (20,30)): size can take any tuple of ints height, width where height and width > 0. Note shape affects the bias of the random walk in make_path, vertical movements are favoured more by a factor of eqn(hieght/(height+width)). This seems to be the most general way of guiding the random walk through mazes of varying dimensions. 
-  2. **n_routes** (int, DEFAULT = 1): All mazes are produced with several possible routes as solutions. This was introduced as an possible extension to test the AI's efficiency in choosing the most optimal path. All tests will intitially be started with n_routes of 1 and then increased if the agent performs well.
+```Maze_maker.py``` is a module made to create 2D mazes of any shape. maze_maker has three main functions for regualar use:
+1. **```make_path()```**:
+2. **```fill_walls()```**:
+3. **```create_maze()```**: key vars: 
+  1. **```shape```** (tuple , DEFUALT = (20,30)): size can take any tuple of ints height, width where height and width > 0. Note shape affects the bias of the random walk in make_path, vertical movements are favoured more by a factor of eqn(hieght/(height+width)). This seems to be the most general way of guiding the random walk through mazes of varying dimensions. 
+  2. **```n_routes```** (int, DEFAULT = 1): All mazes are produced with several possible routes as solutions. This was introduced as an possible extension to test the AI's efficiency in choosing the most optimal path. All tests will intitially be started with n_routes of 1 and then increased if the agent performs well.
 Mazes can also be displayed using show()
 ### Status
 All possible improvements are listed below:
@@ -41,16 +41,17 @@ All possible improvements are listed below:
 2. As it stands, mazes will be kept as 2D NumPy arrays and fed to an Agent object to explore, the Agent will have an attribute Q-table to score positions for Q-learning. However, it may be more efficient to have mazes carry their own Q-tables but it may be more difficult because the maze will require agent information such as learning rate and penalties.
 3. The higher dimensions used in the creation of arrays lead to unsighlty indentation which may be hard to follow, possible use of flattening/reshape to make the maze could make the code more aesthetic but harm readability. 
 
-## aMAZE_ai.py
+## **```aMAZE_ai.py```**
 ### Agent
-```python aMAZE_ai.py``` will create an Agent that will solve a given maze from the ```python Maze_maker``` library using Q-learning techniques.
+**```aMAZE_ai.py```** will create an Agent that will solve a given maze from the **```Maze_maker```** library using Q-learning techniques.
 Expected main attributes:
-1. **learning_rate** (float):
-2. **Q_table** (nd NumPy array): a table the Agent will queery to make decisions during the exploration of the maze.
-3. **position** (list): Gives the position of the agent inside the maze. This can be used to show the movement of the agent in animations later on. 
+1. **```learning_rate```** (float):
+2. **```Q_table```** (nd NumPy array): a table the Agent will queery to make decisions during the exploration of the maze.
+3. **```position```** (list): Gives the position of the agent inside the maze. This can be used to show the movement of the agent in animations later on. 
 4. penalties/rewards: Not technically an attribute to the Agent object but will affect the agents behaviour, likely will be encoded in to the environment the agent percieves by using the maze matrix (see make environment)
+
 Expected main methods:
-1. **create_environment(maze)**: 
+1. **```create_environment(maze)```**: 
     This will return a 2D NumPy array with shape (width+2, height+2) as the maze it is asked to solve. The matrix will contain the values of the immediate rewards/penalties the agent would recieve for moving to a position in the maze. The environment is larger than the maze so that attempting to step out of the maze can be heavily penalised. 
 
 ## Workflow
