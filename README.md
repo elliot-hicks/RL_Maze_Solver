@@ -38,7 +38,7 @@ This is a basic example of the mazes made by ```Maze_maker.py```, a 20x30 maze w
 ![alt text](https://github.com/mpags-python/coursework2021-sub1-elliot-hicks/blob/main/plot_example_20x30.png)
 
 ### Maze production
-```Maze_maker.py``` is a module made to create 2D mazes of any shape. ```Maze_maker``` has three main functions for regular use:
+```Maze_maker.py``` is a module made to create 2D mazes of any shape. ```Maze_maker.py``` has three main functions for regular use:
 1. **```create_path(height, width)```**: 
 ```
 def create_path(height, width):
@@ -73,20 +73,20 @@ def create_path(height, width):
             }                   
     return maze_frame
 ```
-2. **```fill_maze_walls(stacked_maze_frame, number_of_mazes)```**: Uses another function ```stack_mazes``` which returns s a 3D matrix of mazes. ```fill_maze_walls()``` then adds walls at random everywhere except where the paths are to fill out the maze.
+2. **```fill_maze_walls(stacked_maze_frame, number_of_mazes)```**: Uses another function ```stack_mazes()``` which returns s a 3D matrix of mazes. ```fill_maze_walls()``` then adds walls at random everywhere except where the paths are to fill out the maze.
 Key parameters:
-   * ```stacked_maze_frame```: 3D NumPy array with dimensions (number_of_mazes, height, width). Created in ```stack_mazes``` which is not shown.
+   * ```stacked_maze_frame```: 3D NumPy array with dimensions (number_of_mazes, height, width). Created in ```stack_mazes()``` which is not shown.
    * ```number_of_mazes```: The number of maze routes to be combined, same as ```n_routes``` (see below).
  
 3. **```create_maze(size, n_routes)```**: Calls all other maze functions, will provide a user input option. Key parameters:
-    * **```shape```** (tuple , DEFUALT = (20,30)): size can take any tuple of ints height, width where height and width > 0. Note shape affects the bias of the random walk in make_path, vertical movements occur with probabilit (height/(height+width)). This seems to be the most general way of guiding the random walk through mazes of varying dimensions. 
+    * **```shape```** (tuple , DEFUALT = (20,30)): size can take any tuple of two ints (height, width where height and width > 0). Note, the shape affects the bias of the random walk in create_path, vertical movements occur with probabilit (height/(height+width)). This seems to be the most general way of guiding the random walk through mazes of varying dimensions. 
     * **```n_routes```** (int, DEFAULT = 1): All mazes are produced with several possible routes as solutions. This was introduced as an possible extension to test the AI's efficiency in choosing the most optimal path. All tests will intitially be started with n_routes of 1 and then increased if the agent performs well.
 Mazes can also be displayed using show()
 
 
 ### Maze Visualisation:
 
-Mazes are currently visualised using ```imshow``` from the matplotlib library. Values for pixels are:
+Mazes are currently visualised using [matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html) from the matplotlib library. Values for pixels are:
 * Tunnell: 0
 * Wall: 1
 * Start ([0,0], top left): 3 
