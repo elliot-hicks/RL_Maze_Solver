@@ -128,9 +128,11 @@ The plan is to use a CNN from the pytorch library to solve the mazes, to do this
 to create one with the following file structure, however im still new to making packages so I expect some issues, particularly
 with the use of ```maze_maker.py``` as it is several directories above the maze_env file, the current file structure is:
 ``` 
-maze_maker.py
+maze_maker:
+  > __innit__
+  > maze_maker.py
 aMAZE_ai
-  gym-maze
+  > gym-maze
     >README.md
     >gym_maze:
       >__init__.py
