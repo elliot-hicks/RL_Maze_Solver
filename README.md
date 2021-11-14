@@ -45,12 +45,13 @@ Note: ```Maze_maker.py``` was updated from a random walk generator to a recursiv
 The recursive algorithm that inspired this method can be found here: [wiki recursive](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_implementation).
 
 An exmple of the recursive process is shown below:
+
 ![recursive mase generation](https://upload.wikimedia.org/wikipedia/commons/9/90/Recursive_maze.gif)
 
 
 Key functions:
 
-###```recursive_maze(maze)```:
+### ```recursive_maze(maze)```:
    
 * Parameters:
 
