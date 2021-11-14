@@ -1,91 +1,111 @@
-# DATE SINCE LAST UPDATE: 25/10/2021
-# Author: Elliot Hicks
-# Contact: ppxeh1@nottingham.ac.uk
-
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+height = 20
+width = 30
 
+maze_frame = np.zeros((height,width))
 
-def position_check(position, height, width):
-    if ((position[0]>=0 and position[0]<=height-1 ) and
-        (position[1]>=0 and position[1]<=width-1)):
-        return True
+def recursive_maze(maze):
+    """
+    Parameters
+    ----------
+    maze : ARRAY
+        2D array that descibes the maze as a matrix of ints.
+        0 = steppable space
+        1 = wall
+        2 = vertical gate (hole in vertical wall)
+        3 = horizontal gate (hole in horizontal wall)
+
+    Returns
+    -------
+    maze : Array
+        maze is spit in four quadrants using one h. wall and one v. wall.
+        walls have gates added at random
+        each quadrant then is treated as a maze and fed back in to function
+        this recursively builds up a maze.
+    """
+    maze_height = maze.shape[0]
+    maze_width = maze.shape[1]
+    if (maze_height <=2 or maze_width<=2):
+        
+        return maze
     else:
-        return False
+        
+        row = random.randint(1,maze_height-2)  # row of new horizontal wall
+        horizontal_wall = np.ones(maze_width) # intitially full wall
+        col = random.randint(1,maze_width-2) # col of new vertical wall
+        vertical_wall = np.ones(maze_height) 
+        h_gate_ind_1 = random.randint(0,col-1) # pos of gate through horiz wall
+        h_gate_ind_2 = random.randint(col+1,maze_width-1)
+    
+        #  we need to not place vertical gate in the new horizontal wall
+        valid_vertical_gate = False
+        while not valid_vertical_gate:
+            v_gate_ind = random.randint(0,maze_height-1)
+            if v_gate_ind != row: # dont place gate inside new wall
+                valid_vertical_gate = True
+                
+        # encode different gate for later processing
+        vertical_wall[v_gate_ind] = 2 # add vertical gate to v wall
+        horizontal_wall[h_gate_ind_1] = 3 # add horizontal gate to h wall
+        horizontal_wall[h_gate_ind_2] = 3 
+        maze[row,:] = horizontal_wall   # add walls
+        maze[:,col] = vertical_wall        
+        
+        # the two walls split the maze in to 4 chambers
+        
+        # index limits of the full maze that define the chambers
+        chamber_11 = [[0,row],[0,col]] 
+        chamber_12= [[0,row], [col+1, maze_width]]
+        chamber_21= [[row+1,maze_height],[0,col]]
+        chamber_22= [[row+1,maze_height],[col+1,maze_width]]
+        chambers = [chamber_11,chamber_12,chamber_21,chamber_22]
+        
+        for chamber in chambers:
+            maze_chamber = maze[chamber[0][0]:chamber[0][1],
+                                chamber[1][0]:chamber[1][1]]
+            maze_chamber = recursive_maze(maze_chamber)
+            maze[chamber[0][0]:chamber[0][1],
+                 chamber[1][0]:chamber[1][1]] = maze_chamber
+        return maze
+        
+def finalise_maze(maze):
+    """
+    Parameters
+    ----------
+    maze : Array
+        Sometimes added walls obstruct gates, so we use the encoding
+        from the recursive maze generator to find gates and clear space 
+        around them as necessary. Final prodcut is a maze where all points
+        are accessible.
 
-# what type should the maze be? 
-def create_path(height, width): #WORKS
-    # note we wont worry about looping paths as it test optimisation of Q learning
-    # may bias directions but testing fully random walk now
-    # always start at [0,0], and end at [-1,-1]
-    # time randint vs randuni for direction changes
-    
-    maze_frame = np.ones((height,width))
-    maze_frame[0,0] = 0
-    end_found = False
-    
-    position = [0,0]
-    test_position = [0,0]
-    while not end_found:
-        valid_position = False
-        while not valid_position:   
-            direction_bias_level = height/(height+width)
-            step_bias = 0.7 # think about how to find a justified value
-                            # higher bias makes harder maze!!
-            if (random.uniform(0, 1)<direction_bias_level):
-                axis_for_movement = 0
-            else:
-                axis_for_movement = 1
-            if (random.uniform(0, 1)<step_bias):
-                step_value = 1
-            else:
-                step_value = -1
-            #-1 left/up, 1 right/down (biased because we want to get to [-1,-1])
-            test_position[axis_for_movement] = position[axis_for_movement] + step_value
-            valid_position = position_check(test_position, height, width)
-            if (valid_position):
-                position[axis_for_movement] = position[axis_for_movement] + step_value
-                maze_frame[position[0],position[1]] = 0
-                if (position == [height-1,width-1]):
-                    end_found = True
+    Returns
+    -------
+    maze : Array
+        returns finalised array.
+    """
+    for row in range(len(maze[:,0])):
+        for col in range(len(maze[0,:])):
+            if(maze[row,col] == 3):
+                maze[row+1,col], maze[row,col], maze[row-1,col] = 0,0,0
+            elif(maze[row,col] == 2):
+                maze[row,col-1], maze[row,col], maze[row,col+1] = 0,0,0
             else:
                 pass
-        
-    return maze_frame
-
-def stack_mazes(size, number_of_mazes):
-    # creates a 3d np array of mazes
-    stacked_maze_frame = np.zeros((size[0],size[1],number_of_mazes)) 
-    for iteration in range(number_of_mazes):
-        stacked_maze_frame[:,:,iteration] = create_path(size[0], size[1])
-    return stacked_maze_frame
-
-def fill_maze_walls(stacked_maze_frame, number_of_mazes):
-    # we take all the mazes in the stacked maze 3d array and combine them
-    # if a point is part of any maze's route, it is added to the full maze's route
-    maze_frame = stacked_maze_frame[:,:,0]
-    for row in range(len(maze_frame[:,0])):
-        for column in range(len(maze_frame[0,:])):
-            for maze in range(number_of_mazes):
-                maze_frame[row,column] *= stacked_maze_frame[row,column,maze]
-            maze_frame[row,column] *= random.randint(0,1) #
-    return maze_frame
+    return maze
 
 def show(maze):
-    #formatting image
+    """
+    Plots array with start and ending points highlighted.
+
+    """
     maze[-1,-1] = 4 
     maze[0,0] = 3 
     plt.axis('off')
-    plt.imshow(maze)    
+    plt.imshow(maze) 
+    
+maze_init = recursive_maze(maze_frame)
+maze = finalise_maze(maze_init)
+show(maze)
             
-
-def create_maze(size = (20,30),n_routes = 1):
-    
-    stacked_maze_frame = stack_mazes( size, n_routes)
-    maze = fill_maze_walls(stacked_maze_frame, n_routes)
-    return maze
-    
-maze = create_maze((20,30),1)
-show(maze)  
-
