@@ -1,5 +1,5 @@
 
-import gym
+import gym # I had to use pip install instead of conda to get gym, do you know why?
 from gym import error, spaces, utils
 from gym.utils import seeding
 import maze_maker as mm
@@ -24,6 +24,7 @@ class MazeEnv(gym.Env):
         self.done = False
         
     def step(self, agent_action, agent_sore):
+        # calc get rewards etc for state transitions
         self.old_state = self.state
         self.state[self.agent_positon[0],self.agent_position[1]] = 0  # erase old agent position 3->0
         self.agent_position += np.asarray(agent_action) # actions written as vectors
@@ -34,12 +35,13 @@ class MazeEnv(gym.Env):
         return ([self.old_state, action, self.state, reward])
         
     def reset(self):
+        # reset the env
         self.state = self.old_state = original_maze 
         self.agent_position = np.asarray([1,1])
         self.done = False
         
     def render(self, mode='human', close=False):
-        mm.show(self.state)
+        mm.show(self.state) # print out the maze using matplot.imshow
         
     def is_ep_finished(self, agent_score):
         # if agent performance is too poor or agent solved maze, end episode
