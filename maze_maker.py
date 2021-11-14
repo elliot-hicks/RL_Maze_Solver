@@ -6,7 +6,7 @@ width = 30
 
 maze_frame = np.zeros((height,width))
 
-def recursive_maze(maze):
+def recursive_maze(maze = maze_frame):
     """
     Parameters
     ----------
@@ -112,7 +112,11 @@ def show(maze):
     plt.axis('off')
     plt.imshow(maze) 
     
-maze_init = recursive_maze(maze_frame)
-maze = finalise_maze(maze_init)
-show(maze)
+def build_maze(width,height):
+    maze_frame = np.zeros((height,width))
+    maze_init = recursive_maze(maze_frame)
+    maze = -1* finalise_maze(maze_init) #insert reward for being in forbidden state 
+    maze[-2,-2] = +1 # insert rewards for being in goal state
+    
+    return maze
             
