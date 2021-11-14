@@ -35,57 +35,65 @@ Required Packages:
 ## ```Maze_maker.py```
 
 This is a basic example of the mazes made by ```Maze_maker.py```, a 20x30 maze where the agent will start at [0,0] (top-left) and aims to find the exit at [-1,-1] (bottom-right).
+Note: ```Maze_maker.py``` was updated from a random walk generator to a recursive maze generator, this makes far more difficult mazes.
 
-![alt text](https://github.com/mpags-python/coursework2021-sub1-elliot-hicks/blob/main/plot_example_20x30.png)
+![Maze_maker.py original design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/plot_example_20x30.png)
+![Maze_maker.py new design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png)
 
 ### Maze production
-```Maze_maker.py``` is a module made to create 2D mazes of any shape. ```Maze_maker.py``` has three main functions for regular use:
-1. **```create_path(height, width)```**:  Returns 2d NumpY Array. Used to create a *random* walk through the maze as a solution. Involves several biasing variables to help the random walk reach [-1,-1] without too many steps. This actually creates more difficult mazes as the solution is less easy to stumble upon.
-```
-def create_path(height, width):
-    # note we wont worry about looping paths as it test optimisation of Q learning
-    # always start at [0,0], and end at [-1,-1]
-    
-    maze_frame = np.ones((height,width)) # matrix describing the random walk
-    position = [0,0]
-    test_position = [0,0]
-    
-    while not end_found:
-        valid_position = False
-        while not valid_position:   
-            # bias random walk to adjust to different shape mazes
-            direction_bias_level = height/(height+width)
-            step_bias = 0.7 #prob step right = 70%
-            if (random.uniform(0, 1)<direction_bias_level): # way to implement random vars
-                axis_for_movement = 0
-            else:
-                axis_for_movement = 1
-            if (random.uniform(0, 1)<step_bias):
-                step_value = 1
-            else:
-                step_value = -1
-            {
-            ... #psuedo code to save space, see Maze_maker.py for full code
-            
-            CHECK IF NEW POSITION IS VALID:
-                  IF SO, UPDATE POSITION
-                  ELSE START AGAIN
-            REPEAT UNTIL FINAL POSITION FOUND
-            ...
-            }                   
-    return maze_frame
-```
-2. **```fill_maze_walls(stacked_maze_frame, number_of_mazes)```**: Returns 2D NumPy array. Uses another function ```stack_mazes()``` which returns s a 3D matrix of mazes. ```fill_maze_walls()``` then adds walls at random everywhere except where the paths are to fill out the maze.
-Key parameters:
-   * ```stacked_maze_frame```: 3D NumPy array with dimensions (number_of_mazes, height, width). Created in ```stack_mazes()``` which is not shown.
-   * ```number_of_mazes```: The number of maze routes to be combined, same as ```n_routes``` (see below).
- 
-3. **```create_maze(size, n_routes)```**:  Returns 2D NumPy array. Calls all other maze functions, will provide a user input option. Key parameters:
-    * **```shape```** (tuple , DEFUALT = (20,30)): size can take any tuple of two ints (height, width where height and width > 0). Note, the shape affects the bias of the random walk in create_path, vertical movements occur with probabilit (height/(height+width)). This seems to be the most general way of guiding the random walk through mazes of varying dimensions. 
-    * **```n_routes```** (int, DEFAULT = 1): All mazes are produced with several possible routes as solutions. This was introduced as an possible extension to test the AI's efficiency in choosing the most optimal path. All tests will intitially be started with n_routes of 1 and then increased if the agent performs well.
-Mazes can also be displayed using show()
+```Maze_maker.py``` is a module made to create 2D mazes of any shape. 
+The recursive algorithm that inspired this method can be found here: [wiki recursive](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_implementation).
+
+An exmple of the recursive process is shown below:
+![recursive mase generation](https://upload.wikimedia.org/wikipedia/commons/9/90/Recursive_maze.gif)
 
 
+Key functions:
+
+###```recursive_maze(maze)```:
+   
+* Parameters:
+
+  * maze (2D NumPy array):
+  * maze is spit in four quadrants using one horizontal wall and one vertical wall.
+  * walls have gates added at random
+  * each quadrant then is treated as a maze and fed back in to function this recursively builds up the maze
+
+* Returns:
+    * maze NumPy array that descibes the maze as a matrix of ints:
+    * 0 = steppable space
+    * 1 = wall
+    * 2 = vertical gate (hole in vertical wall)
+    * 3 = horizontal gate (hole in horizontal wall)
+    * Gates are highlighted so we can remove any obstructions made during the maze generation
+
+### ```finalise_maze(maze)```:
+
+* Parameters
+
+  * maze (2D NumPy array): Sometimes added walls obstruct gates, so we use the encoding
+    from the recursive maze generator to find gates and clear space 
+    around them as necessary. Final prodcut is a maze where all points
+    are accessible.
+
+* Returns
+
+  * maze (2D NumPy array): returns finalised array
+  * Code snipppet below shows the process of removing obstructions around gates
+    * gates in horizontal walls (value = 2) must have the entrance cleared above, below and inside gate.
+    * gates in vertical walls (value = 3) must have the entrance cleared left, right and inside gate.
+  * this final step made the code much more readable as introducing obstruction clearing in the maze generator made the code undreadable.
+```python
+for row in range(len(maze[:,0])):
+    for col in range(len(maze[0,:])):
+        if(maze[row,col] == 3):
+            maze[row+1,col], maze[row,col], maze[row-1,col] = 0,0,0
+        elif(maze[row,col] == 2):
+            maze[row,col-1], maze[row,col], maze[row,col+1] = 0,0,0
+        else:
+            pass
+return maze
+```
 ### Maze Visualisation:
 
 Mazes are currently visualised using [matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html) from the matplotlib library. Values for pixels are:
@@ -93,7 +101,7 @@ Mazes are currently visualised using [matplotlib.pyplot.imshow](https://matplotl
 * Wall: 1
 * Start ([0,0], top left): 3 
 * Goal ([-1,-1], bottom right): 4
-```
+```python
 def show(maze):
     #formatting image
     maze[-1,-1] = 4 
@@ -101,15 +109,12 @@ def show(maze):
     plt.axis('off')
     plt.imshow(maze)    
 ```
-![alt text](https://github.com/mpags-python/coursework2021-sub1-elliot-hicks/blob/main/plot_example_20x30.png)
+![alt text](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/plot_example_20x30.png)
 
 ### Status
 All possible improvements are listed below:
-1. A new function to save the mazes will be needed, the mazes are randomly generated so it makes sense to save some to test the AIs performance over time.
-1. Exception handling may be itroduced on maze creation for the shape variable.
-2. As it stands, mazes will be kept as 2D NumPy arrays and fed to an Agent object to explore, the Agent will have an attribute Q-table to score positions for Q-learning. However, it may be more efficient to have mazes carry their own Q-tables but it may be more difficult because the maze will require agent information such as learning rate and penalties.
-3. The higher dimensions used in the creation of arrays lead to unsighlty indentation which may be hard to follow, possible use of flattening/reshape to make the maze could make the code more aesthetic but harm readability. 
-
+1. To aid the training, walls need to be added around the maze to block in the agent.
+2. Add pickle or start using seeds, verring towards use of pickle so i can also save NN parameters.
 ## **```aMAZE_ai.py```**
 ### Agent
 **```aMAZE_ai.py```** will contain an Agent class that will solve a given maze from the **```Maze_maker```** library using Q-learning techniques.
