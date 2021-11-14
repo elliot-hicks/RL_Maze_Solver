@@ -131,14 +131,13 @@ with the use of ```maze_maker.py``` as it is several directories above the maze_
 maze_maker:
   > __innit__
   > maze_maker.py
-aMAZE_ai
-  > gym-maze
-    >README.md
-    >gym_maze:
-      >__init__.py
-      >envs:
-        >maze_env.py
-        >__innit__.py
+gym-maze:
+  >README.md
+  >gym_maze:
+    >__init__.py
+    >envs:
+      >maze_env.py
+      >__innit__.py
 ```
 
 ## ```maze_env.py```:
