@@ -110,7 +110,7 @@ def show(maze):
     plt.axis('off')
     plt.imshow(maze)    
 ```
-![alt text](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/plot_example_20x30.png)
+![alt text](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png)
 
 ### Status
 All possible improvements are listed below:
