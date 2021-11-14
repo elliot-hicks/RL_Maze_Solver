@@ -85,23 +85,30 @@ def finalise_maze(maze):
     maze : Array
         returns finalised array.
     """
-    for row in range(len(maze[:,0])):
-        for col in range(len(maze[0,:])):
+    maze_height = len(maze[:,0])
+    maze_width = len(maze[0,:])
+    for row in range(maze_height):
+        for col in range(maze_width):
             if(maze[row,col] == 3):
                 maze[row+1,col], maze[row,col], maze[row-1,col] = 0,0,0
             elif(maze[row,col] == 2):
                 maze[row,col-1], maze[row,col], maze[row,col+1] = 0,0,0
             else:
                 pass
-    return maze
+    # add walls surrounding the maze
+    maze_with_borders = np.ones((maze_height+2,maze_width+2))
+    maze_with_borders[1:maze_height+1,1:maze_width+1] = maze # fill centre with maze
+    
+    
+    return maze_with_borders
 
 def show(maze):
     """
     Plots array with start and ending points highlighted.
 
     """
-    maze[-1,-1] = 4 
-    maze[0,0] = 3 
+    maze[-2,-2] = 4 
+    maze[1,1] = 3 
     plt.axis('off')
     plt.imshow(maze) 
     
