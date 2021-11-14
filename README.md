@@ -121,19 +121,17 @@ All possible improvements are listed below:
 **```aMAZE_ai.py```** will contain an Agent class that will solve a given maze from the **```Maze_maker```** library using Q-learning techniques.
 
 Agent main **attributes**:
-1. **```learning_rate```** (float): This will affect how quickly the agent will take in new information for updating Q-values.
-2. **```Q_table```** (3D NumPy array): A table the Agent will queery to make decisions during the exploration of the maze.
-3. **```position```** (list): Gives the position of the agent inside the maze. This can be used to show the movement of the agent in animations later on. 
-4. penalties/rewards: Not technically an attribute to the Agent object but will affect the agents behaviour, likely will be encoded in to the environment the agent percieves by using the maze matrix (see make environment).
+1. **```learning_rate```** (float): This will affect how quickly the agent will take in new information for updating Q-values.2
+2. **```position```** (list): Gives the position of the agent inside the maze. This can be used to show the movement of the agent in animations later on. 
+3. penalties/rewards: Not technically an attribute to the Agent object but will affect the agents behaviour, likely will be encoded in to the environment the agent percieves by using the maze matrix (see make environment).
 
 Agent main **methods**:
 1. **```create_environment(maze)```**: This will return a 2D NumPy array with shape (width+2, height+2) as the maze it is asked to solve. The matrix will contain the values of the immediate rewards/penalties the agent would recieve for moving to a position in the maze. The environment is larger than the maze so that attempting to step out of the maze can be heavily penalised. 
 2. **```explore()```**: This will tell the agent to *explore* its environment as part of its Q-learning.
-3. **```update_Q()```**: Update Q-table.
-4. **```pick_action()```**: Returns int. Use Q-table to choose next action based on immediate reward and future state.
-5. **```check_position()```**: Returns bool value. Check if Agent has found end of maze.
-6. **```save_sol()```**: Saves the Q-table values for the maze, possibly in form of actions i.e. 1,2,1,4,3 where each corresponds to an action. Or saves a *map* which draws out the route in a 2D array. I beleive the first option would be more efficient to use with some sort of ```take_action(action)``` function. 
-7. **```save_stats()```**: Writes to a text file. All attempts to solve the maze will have stats recored e.g. time to solve, total length of solution route. This will allow for performance of the AI to be monitored over time. Possibly saved as image, with plot of maze and the stats underneath.
+3. **```pick_action()```**: Returns int. Use Q-table to choose next action based on immediate reward and future state.
+4. **```check_position()```**: Returns bool value. Check if Agent has found end of maze.
+5. **```save_sol()```**: Saves the Q-table values for the maze, possibly in form of actions i.e. 1,2,1,4,3 where each corresponds to an action. Or saves a *map* which draws out the route in a 2D array. I beleive the first option would be more efficient to use with some sort of ```take_action(action)``` function. 
+6. **```save_stats()```**: Writes to a text file. All attempts to solve the maze will have stats recored e.g. time to solve, total length of solution route. This will allow for performance of the AI to be monitored over time. Possibly saved as image, with plot of maze and the stats underneath.
 
 ### Status:
 aMAZE_ai (name is up for debate) is yet to be written. I decided that desinging the mazes should take precedence over designing the AI because the maze design will heavily influence the behavior of the Agent. I have also been reading Tom Mitchell's *'Machine Learning'* and Paul Wilmott's *'Machine Learning: An Applied Mathematics Introduction'*. I aim to learn how to write a Q-learning algorithm from these texts. Links to both texts can be found below in [References](#references).
@@ -153,7 +151,7 @@ aMAZE_ai (name is up for debate) is yet to be written. I decided that desinging 
 ## Similar Work
 This is a very basic application of RL and so has been done many times. One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](https://simpleai.readthedocs.io/en/latest/).
 
-## References
+References:
 
 1. T. Mitchell, 'Machine Learning, International Student Edition', 1997, p.367-387 [Mitchell](http://www.cs.cmu.edu/~tom/mlbook.html)
 2. P. Wilmott, 'Machine Learning: An Applied Mathematics Introduction, 2020, p.173-215 [Willmott](https://www-tandfonline-com.nottingham.idm.oclc.org/doi/full/10.1080/14697688.2020.1725610) 
@@ -162,3 +160,4 @@ This is a very basic application of RL and so has been done many times. One exam
 ## Contact
 
 :email: Email: [ppxeh1@nottingham.ac.uk](mailto:ppxeh1@nottingham.ac.uk)
+
