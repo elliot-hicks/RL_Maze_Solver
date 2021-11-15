@@ -28,12 +28,14 @@ Required Packages:
 * **NumPy**
 * **Random**
 * **Matplotlib.pyplot**
-* **Maze_maker**: link for code: [Maze_maker.py](https://github.com/elliot-hicks/RL_Maze_Solver/blob/main/maze_maker.py)
+* **maze_maker**:
+* **gym_maze_package**
+* **collections**
 * **gym**
 * **Pytorch**
 
 # Usage
-## ```Maze_maker.py```
+# Maze_maker.py
 
 This is a basic example of the mazes made by ```Maze_maker.py```, a 20x30 maze where the agent will start at [0,0] (top-left) and aims to find the exit at [-1,-1] (bottom-right).
 Note: ```Maze_maker.py``` was updated from a random walk generator to a recursive maze generator, this makes far more difficult mazes.
@@ -41,7 +43,7 @@ Note: ```Maze_maker.py``` was updated from a random walk generator to a recursiv
 ![Maze_maker.py original design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/plot_example_20x30.png)
 ![Maze_maker.py new design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png)
 
-### Maze production
+## Maze production
 ```Maze_maker.py``` is a module made to create 2D mazes of any shape. 
 The recursive algorithm that inspired this method can be found here: [wiki recursive](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_implementation).
 
@@ -52,7 +54,7 @@ An exmple of the recursive process is shown below:
 
 Key functions:
 
-###```recursive_maze(maze)```:
+1.```recursive_maze(maze)```:
    
 * Parameters:
 
@@ -69,7 +71,7 @@ Key functions:
     * 3 = horizontal gate (hole in horizontal wall)
     * Gates are highlighted so we can remove any obstructions made during the maze generation
 
-### ```finalise_maze(maze)```:
+2.```finalise_maze(maze)```:
 
 * Parameters
 
@@ -96,7 +98,7 @@ for row in range(len(maze[:,0])):
             pass
 return maze
 ```
-### Maze Visualisation:
+## Maze Visualisation:
 
 Mazes are currently visualised using [matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html) from the matplotlib library. Values for pixels are:
 * Tunnell: 0
@@ -114,17 +116,80 @@ def show(maze):
 
 ![Maze_maker.py new design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png)
 
-### Status
+## maze_maker Status:
+The maze_maker file is now finished, I dont predict any changed needing to be made however some useful extensions are
+anticipated.
 All possible improvements are listed below:
-1. To aid the training, walls need to be added around the maze to block in the agent.
-2. Add pickle or start using seeds, veering towards use of pickle so i can also save NN parameters.
-3. Add exception handling for stupid maze inputs
-## **```aMAZE_ai.py```**
-### Agent
-* **```aMAZE_ai.py```** will contain an Agent class that will solve a given maze from the **```Maze_maker```** library using Q-learning techniques.
+1. Add pickle or start using seeds, veering towards use of pickle so i can also save NN parameters.
+2. Add exception handling for stupid maze inputs
+
+
+# aMAZE_ai.py:
+
+## ```Agent```:
+* **```aMAZE_ai.py```** will contain an Agent class that will solve a given maze from the **```maze_maker```** library using Q-learning techniques.
 * The agent class was revised following the introduction of the ```Gym``` library:
-### ```openAI/Gym```:
-The plan is to use a CNN from the pytorch library to solve the mazes, to do this we need a gym environment, so i have attempted
+
+## ```ExperienceBuffer```:
+In order to train a CNN to solve these mazes, I want to give it a short-term memory, this comes in the form of the 
+ExperienceBuffer class. This is essentially a deque from *collections* which is an array with a fixed capacity. 
+Any transitions made by the Agent class will be recorded in the Experience buffer. To fill the buffer with experiences
+a *namedtuple* (also from *collections*) has been introduced:
+```python 
+Experience = namedtuple('Experience','old_state action new_state initial_reward final_reward')
+```
+Here we add where the agent was, its action, the resulting state, the intial reward from the action and the final reward.
+the final reward corresponds to the score of the agent at the end of the episode, its key to creating [elite buffers](#elite buffers).
+
+The ExperienceBuffer class has (currently) three main attributes:
+1. capacity (int): How many experiences the deque can hold, this is analogous to how short or long the networks memory is.
+2. memory_buffer (deque): the actual deque for experiences with maxlen = capacity,
+3. size (int): the length of the memory_buffer, once size = capacity, training can start.
+
+The ExperienceBuffer has three main methods:
+1. ```__innit__```:
+```python 
+def __init__(self, capacity):
+      self.capacity = capacity
+      self.memory_buffer = collections.deque(maxlen = capacity)
+      self.size = len(self.memory_buffer) # current size of the memory buffer 
+```
+2. ```add```:
+```python 
+def add(self, experience):
+      self.memory_buffer.append(experience) #add to right of buffer
+```
+3. ```random_sample_batch```
+```python 
+def random_sample_batch(self, batch_size = 100):
+        batch = random.sample(self.memory_buffer,batch_size)
+        return batch
+```
+## Elite buffers:
+In order to improve training of the CNN, many training regimens employ an 'elite buffer', a buffer of transitons/experiences
+that were part of particularly good episodes (say the top 10% of all final scores). The memories in this buffer are
+protected, their existence in the CNNs memory extended, so that they can reinforce its behaviour for a longer amount of
+time. 
+
+I havent decided yet if I will implement this. It is of course a great addition, however I want to solve employing the 
+normal batch learning before introducing more complex models like this.
+
+## Use of Pytorch:
+
+I plan to use a CNN from the pytorch library to solve the maze, a single CNN will be used. The current aMAZEai package 
+shows a pseudocode for the implementation of two NNs, a main and a target NN, while this would produce more stable training, it seemed
+overcomplicated. 
+
+### aMAZE_ai status:
+With most of the maze environment building complete, bar some installation bugs, the aMAZE_ai file was able to take form.
+aMAZEai now contains the Experience and ExpereienceBuffer objects which can be used in the training of the CNN. 
+With the maze environment taking on most of the functionality of the Agent, we can now focus on the training algorithm, 
+the most exciting part.
+
+# openAI/Gym custom gym environment: 'maze_env':
+
+In order to make the generated maze from maze_maker a gym-environment for the pytorch library I had to learn to create my own custom 
+environments for OpenAi's Gym package. I did this using A. Poddars article [3]. Following this i have attempted
 to create one with the following file structure, however im still new to making packages so I expect some issues, particularly
 with the use of ```maze_maker.py``` as it is several directories above the maze_env file, the current file structure is:
 ``` 
@@ -141,9 +206,15 @@ gym_maze_package:
       >__innit__.py
 ```
 
-## ```maze_env.py```:
-In order to make the generated maze a gym-environment for the pytorch library I had to learn to create my own custom 
-environments for OpenAi. I did this using A. Poddars article [3].
+This is mostly resolved, however I'm now struggling to install the custom environment to the gym package. My reference
+guide [3] suggests using :
+```python 
+pip install -e .
+```
+within the gym_maze file but it isnt working.
+
+## maze_env:
+
 ```maze_env.py``` requires four functions to be compatible with the pytorch training, specifically:
 1. ```__innit__```:
 ```python
@@ -191,29 +262,22 @@ def __init__(self):
         mm.show(self.state, self.agent_position) # print out the maze using matplot.imshow
 ```
 
-Npte here that there are some helper functions, ``` is_ep_finsihed``` and ``` calc_reward``` which simply tell us if the
+Note here that there are some helper functions, ``` is_ep_finsihed``` and ``` calc_reward``` which simply tell us if the
 episode is over and the reward for a given action respectively. I anticipate the env will also need some changes once the 
 aMAZE_ai file is finished, Given the large overlap of the environment methods and  those discussed in the early Agent 
 designs, the Agent class must be redesigned.
-## ```Pytorch```:
 
-I plan to use a CNN from the pytorch library to solve the maze, a single CNN will be used. The current aMAZEai package 
-shows a pseudocode for the implementation of two NNs, a main and a target NN, while this would produce more stable training, it seemed
-overcomplicated. However, the idea of a memory buffer is excellent,and I will be applying it to the CNN code. I have also
-seen interesting methods of applying an 'elite' batch which retains the most profitable episodes for a longer time period,
-I would like to apply a similar method, time permitting.
-
-### Status:
-aMAZE_ai (name is up for debate) is yet to be written, with the gym environment now taking precedence, hence the roadmap has also been revised.
-I decided that designing the mazes should take precedence over designing the AI because the maze design will heavily influence the behavior of the Agent.
-I have also been reading Tom Mitchell's *'Machine Learning'* and Paul Wilmott's *'Machine Learning: An Applied Mathematics Introduction'*. 
-I aim to learn how to write a Q-learning algorithm from these texts. Links to both texts can be found below in [References](#references).
+# gym_maze_package Status:
+Improvements for the gym_maze_package are mostly at a standstill until I figure out how to get the custom gym environment
+installed to the gym package. But the codes in the gym_env.py are all working and have been tested. The issues with
+importing the maze_maker package from sever directories above the gym_env.py were solved! It was an overall quite fun 
+experience to learn how to configure this environment by solving that issue.
 
 ## Roadmap
-- [x] Design Maze_maker package,
+- [x] Design Maze_maker package (:exclamation: introduce pickle to save mazes),
 - [x] Visualise Maze,
-- [X] Finish maze_env (requires testing)
-- [ ] Build aMAZE_ai package (now with the new pytorch involvment, this should be made fairly quickly),
+- [X] Finish maze_env (:exclamation: installation bug)
+- [x] Build aMAZE_ai package (now with the new pytorch involvment, this should be made fairly quickly),
 - [ ] Build CNN and batch learning algorithm
 - [ ] Testing:,
   - [ ] Testing is now expected to comprise curriculum learning 
@@ -221,7 +285,8 @@ I aim to learn how to write a Q-learning algorithm from these texts. Links to bo
 
 
 ## Similar Work
-This is a very basic application of RL and so has been done many times. One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](https://simpleai.readthedocs.io/en/latest/).
+This is a very basic application of RL and so has been done many times.
+One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](https://simpleai.readthedocs.io/en/latest/).
 
 ## References
 
