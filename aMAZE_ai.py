@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import collections
-import maze_maker_2 as m
+from maze_maker_package import maze_maker as m
 
 
 class Agent:
@@ -61,7 +61,7 @@ class Agent:
         
     """
     
-maze = m.maze
+maze = m.build_maze()
 Agent = Agent(maze,0.9,10)
 new_state = Agent.apply_action(np.array([1,0]))
 Agent.update_state(new_state)
