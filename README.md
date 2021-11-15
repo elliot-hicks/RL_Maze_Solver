@@ -141,53 +141,59 @@ gym-maze:
 ```
 
 ## ```maze_env.py```:
+In order to make the generated maze a gym-environment for the pytorch library I had to learn to create my own custom 
+environments for OpenAi. I did this using A. Poddars article [3].
 ```maze_env.py``` requires four functions to be compatible with the pytorch training, specifically:
 1. ```__innit__```:
 ```python
 def __init__(self):
-        self.agent_positon = np.asarray([1,1])
+        # use of np.copy is key to avoiding the differnent state vars being updated
+        self.agent_position = np.asarray([1,1])
         self.minimum_threshold = -1
         maze = mm.build_maze(5,5)
-        self.rewards_map = maze # maze without the agents position marked
-        maze[1,1], maze [-2,-2] = 3, 4 # insert agent position and goal state
-        self.original_state = maze # never edited
+        # rewards map: maze without the agents position marked, shallow copy to stop alterations
+        self.rewards_map = np.copy(maze) 
+        maze[1,1], maze [-2,-2] = 3, 4 # insert agent position and goal position
+        self.original_maze = np.copy(maze) # never edited
         self.old_state = maze # updated constantly
         self.state = maze
-        goal_state = maze
-        goal_state[1,1], goal_state[-1,-1] = 0, 3 
+        goal_state = np.copy(maze)
+        goal_state[1,1], goal_state[-2,-2] = 0, 3 
         # copy of maze with agent position at end of maze
         self.goal_state = goal_state
         self.done = False
 ```
 2. ```step```:
 ```python
-def step(self, agent_action, agent_sore):
+    def step(self, agent_action, agent_score):
         # calc get rewards etc for state transitions
         self.old_state = self.state
-        self.state[self.agent_positon[0],self.agent_position[1]] = 0  # erase old agent position 3->0
+        self.state[self.agent_position[0],self.agent_position[1]] = 0  # erase old agent position 3->0
         self.agent_position += np.asarray(agent_action) # actions written as vectors
-        self.state[self.agent_positon[0],self.agent_position[1]] = 3  # flag new agent position x->3
-        self.done = is_ep_finished(agent_score)
-        reward = calc_reward(agent_position)
-        
-        return ([self.old_state, action, self.state, reward])
+        self.state[self.agent_position[0],self.agent_position[1]] = 3  # flag new agent position x->3
+        self.done = self.is_ep_finished(agent_score)
+        reward = self.calc_reward(self.agent_position) 
+        return ([self.old_state, agent_action, self.state, reward])
 ```
 3. ```reset```:
 ```python
     def reset(self):
         # reset the env
-        self.state = self.old_state = original_maze 
+        self.state = self.old_state = self.original_maze 
+        self.state[self.agent_position[0],self.agent_position[1]] = 0  # erase old agent position 3->0
         self.agent_position = np.asarray([1,1])
         self.done = False
 ```
 4. ```render```:
 ```python
     def render(self, mode='human', close=False):
-        mm.show(self.state) # print out the maze using matplot.imshow
+        mm.show(self.state, self.agent_position) # print out the maze using matplot.imshow
 ```
 
-Given the large overlap of the environment methods and those discussed in the early Agent designs, 
-the Agent class must be redesigned.
+Npte here that there are some helper functions, ``` is_ep_finsihed``` and ``` calc_reward``` which simply tell us if the
+episode is over and the reward for a given action respectively. I anticipate the env will also need some changes once the 
+aMAZE_ai file is finished, Given the large overlap of the environment methods and  those discussed in the early Agent 
+designs, the Agent class must be redesigned.
 ## ```Pytorch```:
 
 I plan to use a CNN from the pytorch library to solve the maze, a single CNN will be used. The current aMAZEai package 
@@ -205,11 +211,11 @@ I aim to learn how to write a Q-learning algorithm from these texts. Links to bo
 ## Roadmap
 - [x] Design Maze_maker package,
 - [x] Visualise Maze,
-- [ ] Finish maze_env
-- [ ] Build aMAZE_ai package (with the new pytorch involvment, this should be made fairly quickly),
+- [X] Finish maze_env (requires testing)
+- [ ] Build aMAZE_ai package (now with the new pytorch involvment, this should be made fairly quickly),
 - [ ] Build CNN and batch learning algorithm
 - [ ] Testing:,
-  - [ ] Testing is now expected to comprise of curriculum learning 
+  - [ ] Testing is now expected to comprise curriculum learning 
 - [ ] Find optimal params for a given maze/ investigate learning rate effects on efficiency.
 
 
@@ -220,7 +226,7 @@ This is a very basic application of RL and so has been done many times. One exam
 
 1. T. Mitchell, 'Machine Learning, International Student Edition', 1997, p.367-387 [Mitchell](http://www.cs.cmu.edu/~tom/mlbook.html)
 2. P. Wilmott, 'Machine Learning: An Applied Mathematics Introduction, 2020, p.173-215 [Willmott](https://www-tandfonline-com.nottingham.idm.oclc.org/doi/full/10.1080/14697688.2020.1725610) 
-
+3. A. Poddar, 'Making a custom environment in gym', 2019, [Poddar](https://medium.com/@apoddar573/making-your-own-custom-environment-in-gym-c3b65ff8cdaa)
 
 ## Contact
 
