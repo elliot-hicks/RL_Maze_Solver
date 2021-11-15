@@ -128,7 +128,7 @@ All possible improvements are listed below:
 
 ## ```Agent```:
 * **```aMAZE_ai.py```** will contain an Agent class that will solve a given maze from the **```maze_maker```** library using Q-learning techniques.
-* The agent class was revised following the introduction of the ```Gym``` library:
+* The agent class was revised following the introduction of the OpenAI and Gym libraries [openAI/Gym custom gym environment: 'maze_env'](#openAI/Gym-custom-gym-environment:-'maze_env':).
 
 ## ```ExperienceBuffer```:
 In order to train a CNN to solve these mazes, I want to give it a short-term memory, this comes in the form of the 
@@ -264,8 +264,8 @@ def __init__(self):
 
 Note here that there are some helper functions, ``` is_ep_finsihed``` and ``` calc_reward``` which simply tell us if the
 episode is over and the reward for a given action respectively. I anticipate the env will also need some changes once the 
-aMAZE_ai file is finished, Given the large overlap of the environment methods and  those discussed in the early Agent 
-designs, the Agent class must be redesigned.
+aMAZE_ai file is finished. Given the large overlap of the environment methods and  those discussed in the early Agent 
+designs, the Agent class was heavily redesigned.
 
 # gym_maze_package Status:
 Improvements for the gym_maze_package are mostly at a standstill until I figure out how to get the custom gym environment
@@ -278,10 +278,10 @@ experience to learn how to configure this environment by solving that issue.
 - [x] Visualise Maze,
 - [X] Finish maze_env (:exclamation: installation bug)
 - [x] Build aMAZE_ai package (now with the new pytorch involvment, this should be made fairly quickly),
-- [ ] Build CNN and batch learning algorithm
-- [ ] Testing:,
+- [ ] Build CNN and design batch learning algorithm
+- [ ] Testing:
   - [ ] Testing is now expected to comprise curriculum learning 
-- [ ] Find optimal params for a given maze/ investigate learning rate effects on efficiency.
+- [ ] Improve training with the addition of 'elite batches'
 
 
 ## Similar Work
