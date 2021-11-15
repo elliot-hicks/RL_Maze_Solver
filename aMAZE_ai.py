@@ -1,19 +1,77 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import collections
-from maze_maker_package import maze_maker as m
+from collections import namedtuple
+import random
 
+#import packages for maze environments
+from maze_maker_package import maze_maker as m
+import gym
+"""
+Need to resolve issues with maze_gym before we can import these:
+    
+import gym_maze 
+env = gym.make('maze-v0')
+"""
+
+#import pytorch libraries
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+import torchvision.transforms as T
+
+Experience = namedtuple('Experience','old_state action new_state initial_reward final_reward')
+# use of final_reward is for the elite buffer, it may be removed later
+
+
+class ExperienceBuffer():
+    """
+    Experience buffer is bascially a short-term memory for a netural network
+    from which it can select random samples to learn from and stabalize learning
+    Deques are used here such that when we hit capacity, the network 
+    'forgets' the older experiences, and hopefully become filled with
+    experiences of 'good steps'.
+    """
+    def __init__(self, capacity):
+        """
+        Parameters
+        ----------
+        capacity : int
+            The capacity of the networks 'memory' 
+        
+        """
+        self.capacity = capacity
+        self.memory_buffer = collections.deque(maxlen = capacity)
+        self.size = len(self.memory_buffer) # current size of the memory buffer
+    
+    def add(self, experience):
+        self.memory_buffer.append(experience) #add to right of buffer
+        
+    def random_sample_batch(self, batch_size = 100):
+        """
+        Parameters
+        ----------
+        batch_size : int,
+            Hyperparameter: how many experiences we should look at during the 
+            batch training, introduced to stabalize training.The default is 100.
+        Returns
+        -------
+        batch: list of Experiences
+        """
+        
+        batch = random.sample(self.memory_buffer,batch_size)
+        return batch
+            
 
 class Agent:
-    def __init__(self, maze,starting_epsilon,buffer_size):
-        self.environment = maze
-        self.goal_state = np.array([np.shape(maze)[0]-1,np.shape(maze)[1]-1])
-        self.state = np.array([0,0])
+    def __init__(self, maze,starting_epsilon,buffer_size, elite_buffer_size = 100):
         self.epsilon = starting_epsilon
-        self.experience_buffer = collections.deque(maxlen = buffer_size)
-        # we use deques for more efficient appends and max sizes
+        self.experience_buffer = ExperienceBuffer(elite_buffer_size)
+        self.elite_experience_buffer = ExperienceBuffer(elite_buffer_size)
+        # we use deques for more efficient appends and size capping
         self.actions = {"up":[-1,0],"right":[0,1],"down":[1,0],"left":[0,-1]}
-        self.rewards = {"end":1,"step": -0.01}
+        
         
         #initialise nets
         
