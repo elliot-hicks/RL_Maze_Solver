@@ -180,7 +180,7 @@ I plan to use a CNN from the pytorch library to solve the maze, a single CNN wil
 shows a pseudocode for the implementation of two NNs, a main and a target NN, while this would produce more stable training, it seemed
 overcomplicated. 
 
-### aMAZE_ai status:
+## aMAZE_ai status:
 With most of the maze environment building complete, bar some installation bugs, the aMAZE_ai file was able to take form.
 aMAZEai now contains the Experience and ExpereienceBuffer objects which can be used in the training of the CNN. 
 With the maze environment taking on most of the functionality of the Agent, we can now focus on the training algorithm, 
@@ -267,13 +267,13 @@ episode is over and the reward for a given action respectively. I anticipate the
 aMAZE_ai file is finished. Given the large overlap of the environment methods and  those discussed in the early Agent 
 designs, the Agent class was heavily redesigned.
 
-# gym_maze_package Status:
+## gym_maze_package Status:
 Improvements for the gym_maze_package are mostly at a standstill until I figure out how to get the custom gym environment
 installed to the gym package. But the codes in the gym_env.py are all working and have been tested. The issues with
 importing the maze_maker package from sever directories above the gym_env.py were solved! It was an overall quite fun 
 experience to learn how to configure this environment by solving that issue.
 
-## Roadmap
+# Roadmap
 - [x] Design Maze_maker package (:exclamation: introduce pickle to save mazes),
 - [x] Visualise Maze,
 - [X] Finish maze_env (:exclamation: installation bug)
@@ -284,11 +284,11 @@ experience to learn how to configure this environment by solving that issue.
 - [ ] Improve training with the addition of 'elite batches'
 
 
-## Similar Work
+# Similar Work
 This is a very basic application of RL and so has been done many times.
 One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](https://simpleai.readthedocs.io/en/latest/).
 
-## References
+# References
 
 1. T. Mitchell, 'Machine Learning, International Student Edition', 1997, p.367-387 [Mitchell](http://www.cs.cmu.edu/~tom/mlbook.html)
 2. P. Wilmott, 'Machine Learning: An Applied Mathematics Introduction, 2020, p.173-215 [Willmott](https://www-tandfonline-com.nottingham.idm.oclc.org/doi/full/10.1080/14697688.2020.1725610) 
