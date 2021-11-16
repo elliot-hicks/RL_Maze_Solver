@@ -18,8 +18,31 @@
   
 # Description
 
-RL_Maze_Solver will demonstrate the ability of reinforcement learning (specifically Q-learning) by randomly generating 2D mazes and tasking an agent to find its most efficient solution. Mazes are made with the Maze_maker.py package I wrote and allow for 2D mazes with multiple routes to be made. I'm currently trying to create a strong grounding in supervised learning algorithms from a few books listed in the references. 
+RL_Maze_Solver will demonstrate the ability of reinforcement learning (specifically Q-learning)
+by randomly generating 2D mazes and tasking an agent to find its most efficient solution. 
+Mazes are made with the maze_maker.py package I wrote and allow for 2D mazes with multiple routes to be made.
+As the project has grown in complexity, restructuring has been vital for organisation.
+List of main components and their purposes:
+### maze_maker_package:
 
+This package generates recursive mazes.
+
+### gym_maze_package:
+This is the package that converts the maze produced by maze_maker to a suitable gym environment for pytorch implementation
+
+### LeNet_package:
+This is a package designed to make a CNN with adjustable input sizes, designed to be trained to solve the maze by learning
+the optimal policy.
+
+### agent_package: 
+This package contains the design for the Agent class. This class' purpose is to navigate the maze using the network
+for its policy.
+
+### cnn_maze_solver.py:
+This is where all the packages are combined:
+  * the previous packages are used to create the setup for the RL task.
+  * A training algorithm is employed to train the LeNet to produce an optimal policy function.
+  * The Solution is plotted.
 # Installation
 Information on packages/ environments will be made available here:
 
@@ -30,12 +53,14 @@ Required Packages:
 * **Matplotlib.pyplot**
 * **maze_maker**:
 * **gym_maze_package**
+* **LeNet_package**
+* **agent_package**
 * **collections**
 * **gym**
 * **Pytorch**
 
 # Usage
-# Maze_maker.py
+# maze_maker_package
 
 This is a basic example of the mazes made by ```Maze_maker.py```, a 20x30 maze where the agent will start at [0,0] (top-left) and aims to find the exit at [-1,-1] (bottom-right).
 Note: ```Maze_maker.py``` was updated from a random walk generator to a recursive maze generator, this makes far more difficult mazes.
@@ -124,10 +149,10 @@ All possible improvements are listed below:
 2. Add exception handling for stupid maze inputs
 
 
-# aMAZE_ai.py:
+# agent_package:
 
-## ```Agent```:
-* **```aMAZE_ai.py```** will contain an Agent class that will solve a given maze from the **```maze_maker```** library using Q-learning techniques.
+## ```agent.py```:
+This will contain an Agent class that will solve a given maze from the **```maze_maker```** library using Q-learning techniques.
 * The agent class was revised following the introduction of the OpenAI and Gym libraries [openAI/Gym custom gym environment: 'maze_env'](#openAI/Gym-custom-gym-environment:-'maze_env':).
 
 ## ```ExperienceBuffer```:
@@ -174,22 +199,54 @@ time.
 I havent decided yet if I will implement this. It is of course a great addition, however I want to solve employing the 
 normal batch learning before introducing more complex models like this.
 
-## Use of Pytorch:
+## the epsilon-greedy approach:
+A pseudo code for the agent behaviour is now present, the code tells the agent to follow the policy with prob 1-epsilon
+and to pick one of the alterantive actions at random with probability epsilon. Epsilon is planned to decrease as time 
+goes on, with exploration initially being large such that the agent explores and gives the network new data. After some 
+exploration period, the agent's epsilon value begins decreasing by 5% every 100 episodes. Epsion is
+given a lower bound which will be small.This is so that the agent becomes more reliant on the policy as time goes on 
+and the policy improves. 
 
-I plan to use a CNN from the pytorch library to solve the maze, a single CNN will be used. The current aMAZEai package 
-shows a pseudocode for the implementation of two NNs, a main and a target NN, while this would produce more stable training, it seemed
-overcomplicated. 
+Epsilon greedy approach pseudocode:
 
-## aMAZE_ai status:
-With most of the maze environment building complete, bar some installation bugs, the aMAZE_ai file was able to take form.
-aMAZEai now contains the Experience and ExpereienceBuffer objects which can be used in the training of the CNN. 
-With the maze environment taking on most of the functionality of the Agent, we can now focus on the training algorithm, 
-the most exciting part.
+```python    
+    def choose_exploration(self):
+        #use epsilon-greedy for eploration vs exploitation trade off
+        return True if np.random.uniform(0,1)<self.epsilon else False
+                 
+    def choose_step(self,neural_net):
+        
+        action = neural_net.model(state)
+        if choose_exploration:
+            action = random.choice(action_space - action)
+        return action
+    
+    def update_epsilon(number_epsiodes, episode):
+        #epsilon should start high and then start to decrease 
+        expoloration_period= 0.1*number_episodes
+        if (episode < exploration_period):
+            self.epsilon = self.epsilon 
+            # keep epsilon constant for first 10% of runs to encourage exploration early on
+        elif (self.epsilon < self.epsilon_lower_bound):
+            self.epsilon = self.epsilon_lower_bound
+        elif (episode-exploration_period % 100 == 0):
+            self.epsilon *= 0.95**((episode-exploration_period)/100)
+            # reduce epsilon by 5% every 100 episodes
 
-# openAI/Gym custom gym environment: 'maze_env':
+```
+
+## agent.py status:
+With most of the maze environment building complete, bar some installation bugs, the Agent class was able to take form.
+agent.py now contains the Experience and ExpereienceBuffer classes which can be used in the training of the CNN. 
+The Agent class now contains code for choosing steps, implementing an epsilon-greedy policy for exploration vs 
+exploitation. With the maze environment taking on most of the functionality of the Agent, we can now focus on the training algorithm, 
+the most exciting part. This will be harder than expected as it requires me to get a good understanding of the pytorch
+Model class and of its tensors. 
+
+# gym_maze_package:
 
 In order to make the generated maze from maze_maker a gym-environment for the pytorch library I had to learn to create my own custom 
-environments for OpenAi's Gym package. I did this using A. Poddars article [3]. Following this i have attempted
+environments for OpenAi's Gym package. I did this using A. Poddars article [3]. Following this I have attempted
 to create one with the following file structure, however im still new to making packages so I expect some issues, particularly
 with the use of ```maze_maker.py``` as it is several directories above the maze_env file, the current file structure is:
 ``` 
@@ -267,24 +324,44 @@ episode is over and the reward for a given action respectively. I anticipate the
 aMAZE_ai file is finished. Given the large overlap of the environment methods and  those discussed in the early Agent 
 designs, the Agent class was heavily redesigned.
 
-## gym_maze_package Status:
+## gym_maze_package status:
 Improvements for the gym_maze_package are mostly at a standstill until I figure out how to get the custom gym environment
 installed to the gym package. But the codes in the gym_env.py are all working and have been tested. The issues with
 importing the maze_maker package from sever directories above the gym_env.py were solved! It was an overall quite fun 
 experience to learn how to configure this environment by solving that issue.
 
+# LeNet_package
+
+The vision of this is to create a package that can build a flexible CNN class, that is the CNN adapts to the input size
+of the image, fitting the variable size of the mazes made in maze_maker. There is a lot of code available for making a 
+CNN with pytorch and its been fairly easy to implement. 
+
+## LeNet_package status:
+
+Only need ot add the flexible part and this will be good to go. This package, like the Agent package is purely for
+object creation so should be pretty simple.
+
+# cnn_maze_solver.py
+
+This will contain the combination of all the above work to produce the setup for the RL task outlined for this project.
+
+## cnn_maze_solver.py status:
+The training algorithm for this cant start until I learn the ins and outs of Pytorch's Module and tensor classes.
+
 # Roadmap
 - [x] Design Maze_maker package (:exclamation: introduce pickle to save mazes),
 - [x] Visualise Maze,
 - [X] Finish maze_env (:exclamation: installation bug)
-- [x] Build aMAZE_ai package (now with the new pytorch involvment, this should be made fairly quickly),
-- [ ] Build CNN and design batch learning algorithm
+- [x] Build Agent package (now with the new pytorch involvment, this should be made fairly quickly),
+- [x] Build CNN package (:exclamation: use equation in file to make flexible architecture)
+- [ ] Design batch learning algorithm 
 - [ ] Testing:
   - [ ] Testing is now expected to comprise curriculum learning 
 - [ ] Improve training with the addition of 'elite batches'
 
 
 # Similar Work
+
 This is a very basic application of RL and so has been done many times.
 One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](https://simpleai.readthedocs.io/en/latest/).
 
