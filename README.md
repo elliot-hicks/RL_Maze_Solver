@@ -374,6 +374,11 @@ One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](http
 2. P. Wilmott, 'Machine Learning: An Applied Mathematics Introduction, 2020, p.173-215 [Willmott](https://www-tandfonline-com.nottingham.idm.oclc.org/doi/full/10.1080/14697688.2020.1725610) 
 3. A. Poddar, 'Making a custom environment in gym', 2019, [Poddar](https://medium.com/@apoddar573/making-your-own-custom-environment-in-gym-c3b65ff8cdaa)
 
+# Comments/ Questions:
+
+1. Given the size of this README.md growing so fast, should I start splitting this in to smaller readme files within the correspoding packages and retain this as a broader overview of the project? I want to make sure I'm following the 'style' used in github.
+2. I know one of the criterion is good use of github, could you let me know what you think of my use so far? Im enjoying it, the more I use it the faster I can build up this project. I did have some issues where I lost file histories because I was forced to change their names. 
+
 ## Contact
 
 :email: Email: [ppxeh1@nottingham.ac.uk](mailto:ppxeh1@nottingham.ac.uk)
