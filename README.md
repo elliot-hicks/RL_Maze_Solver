@@ -65,6 +65,7 @@ Required Packages:
 This is a basic example of the mazes made by ```Maze_maker.py```, a 20x30 maze where the agent will start at [0,0] (top-left) and aims to find the exit at [-1,-1] (bottom-right).
 Note: ```Maze_maker.py``` was updated from a random walk generator to a recursive maze generator, this makes far more difficult mazes.
 
+
 ![Maze_maker.py original design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/plot_example_20x30.png)
 ![Maze_maker.py new design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png)
 
@@ -73,9 +74,9 @@ Note: ```Maze_maker.py``` was updated from a random walk generator to a recursiv
 The recursive algorithm that inspired this method can be found here: [wiki recursive](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_implementation).
 
 An exmple of the recursive process is shown below:
-
-![recursive mase generation](https://upload.wikimedia.org/wikipedia/commons/9/90/Recursive_maze.gif)
-
+<p align="center">
+  <img width="450" height="450" src="https://upload.wikimedia.org/wikipedia/commons/9/90/Recursive_maze.gif">
+</p>
 
 Key functions:
 
@@ -138,8 +139,10 @@ def show(maze):
     plt.axis('off')
     plt.imshow(maze)    
 ```
+<p align="center">
+  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png">
+</p>
 
-![Maze_maker.py new design](https://github.com/mpags-python/coursework2021-sub2-elliot-hicks/blob/main/new_plot_example_20x30.png)
 
 ## maze_maker Status:
 The maze_maker file is now finished, I dont predict any changed needing to be made however some useful extensions are
