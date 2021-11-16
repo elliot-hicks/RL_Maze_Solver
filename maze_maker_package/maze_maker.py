@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-height = 20
-width = 30
+height = 28
+width = 28
 
 maze_frame = np.zeros((height,width))
 
@@ -112,7 +112,7 @@ def show(maze, agent_position):
     plt.axis('off')
     plt.imshow(maze) 
     
-def build_maze(width=30,height=20):
+def build_maze(width=28,height=28):
     maze_frame = np.zeros((height,width))
     maze_init = recursive_maze(maze_frame)
     maze = -1* finalise_maze(maze_init) #insert reward for being in forbidden state 
