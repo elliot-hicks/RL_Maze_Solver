@@ -43,3 +43,13 @@ class LeNet(Module):
         x = self.log_softmax(x)
         
         return x
+    
+"""
+ TO DO LIST:
+     A few things need adding, this is a very basic CNN architecture,
+     I want to make it able to change to new maze shapes, to do this I need
+     to create a function that calculates the size of the output from a given
+     conv layer, this will be easy, the equation is simply:
+         size_i = (in_size_i - kernal_size_i + 2*padding_size_i)/(stride_i) +1
+    I just need to implement this in between the conv2d layers and the fc layers
+"""
