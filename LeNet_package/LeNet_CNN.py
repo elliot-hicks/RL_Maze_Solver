@@ -14,9 +14,9 @@ from torch.nn import LogSoftmax
 from torch import flatten
 
 
-class LeNet(Module):
+class LeNetCNN(Module):
     def __innit__(self, input_channels = 3, classes = 4):
-        super(LeNet, self).__innit__()
+        super(LeNetCNN, self).__innit__()
         self.convolutional_1 = Conv2d(in_channels = input_channels, out_channels = 20, kernal_size = (5,5))
         self.max_pool_1 = MaxPool2d(kernal_size = (2,2), stride = (2,2))
         self.ReLU_1 = ReLU()
