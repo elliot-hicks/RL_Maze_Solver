@@ -4,7 +4,7 @@ import collections
 from collections import namedtuple
 import random
 
-Experience = namedtuple('Experience','old_state action new_state initial_reward final_reward')
+Experience = namedtuple('Experience','old_state action new_state initial_reward final_reward action_probability')
 # use of final_reward is for the elite buffer, it may be removed later
 
 
@@ -31,7 +31,7 @@ class ExperienceBuffer():
     def add(self, experience):
         self.memory_buffer.append(experience) #add to right of buffer
         
-    def random_sample_batch(self, batch_size = 100):
+    def r_batch(self, batch_size = 100):
         """
         Parameters
         ----------
@@ -53,21 +53,20 @@ class Agent:
         self.experience_buffer = ExperienceBuffer(elite_buffer_size)
         self.elite_experience_buffer = ExperienceBuffer(elite_buffer_size)
         # we use deques for more efficient appends and size capping
-        self.actions = {"up":[-1,0],"right":[0,1],"down":[1,0],"left":[0,-1]}
+        self.action_space = [[-1,0],[0,1],[1,0],[0,-1]]
         
+        #initialise net
+    """
+    def choose_step(self, action_index):
+        # we give the agent the action, we let it choose whether to follow it
         
-        #initialise nets
-        
-    def choose_exploration(self):
-        #use epsilon-greedy for eploration vs exploitation trade off
-        return True if np.random.uniform(0,1)<self.epsilon else False
-"""             
-    def choose_step(self,neural_net):
-        
-        action = neural_net.model(state)
-        if choose_exploration:
-            action = random.choice(action_space - action)
-        return action
+        if np.random.uniform(0,1)<self.epsilon:
+            randmom_index = random.randint(0,3)
+            action = self.action_space.remove(self.action_space[action_index])[random_index]
+            # choose an action at random from the action space with the predicted action exlcuded
+            probability = probabilities.remove(probabilities[action_index])[random_index]
+            # find the corresponding probability for that action
+        return action, probability
     
     def update_epsilon(number_epsiodes, episode):
         #epsilon should start high and then start to decrease 
@@ -80,6 +79,7 @@ class Agent:
         elif (episode-exploration_period % 100 == 0):
             self.epsilon *= 0.95**((episode-exploration_period)/100)
             # reduce epsilon by 5% every 100 episodes
+
 
 To do list:
     Design the algorithm for training with just batches, no elite buffers
