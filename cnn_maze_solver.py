@@ -1,24 +1,15 @@
 #import packages for maze environments
-from maze_maker_package import maze_maker as m
-from agent_package import Agent
+from agent_package import agent as a
+from maze_maker_package import maze_maker
+from LeNet_package import LeNet_CNN as LN
 import gym
-import LeNet as LN
+from gym_maze_package import gym_maze
+env = gym.make('maze-v0')
+
+import torch
 import numpy as np
 
-"""
-from gym_maze_package import gym_maze
-Need to resolve issues with maze_gym before we can import these:
-import gym_maze 
-env = gym.make('maze-v0')
-"""
-
 #import pytorch libraries
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import torchvision.transforms as T
-
 
 def calculate_values(trajectory_rewards, discount_factor):
     for i in range(len(trajectory_rewards)):       
@@ -40,7 +31,7 @@ def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
     # discount rate is tha gamma in most RL formulas, used to encourage efficiency
     # exploration factor gives the proportion of episodes where the agent explores
     exploration_period = 0.1*number_of_episodes
-    agent = Agent(maze_env.maze,starting_epsilon = 0.9,memory_buffer_size = 1000)
+    agent = a.Agent(maze_env.maze,starting_epsilon = 0.9,memory_buffer_size = 1000)
     last_episode = []
     for episode_number in range(number_of_episodes):
         steps = 0
@@ -77,12 +68,11 @@ def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
             
 def maze_solver():
     maze_env = gym.make('maze-v0')
-    starting_position = [1,1]
-    memory_size = 1000
     learning_rate = 1e-3
-    elite_memory_size = 0.1*memory_size
-    agent = Agent(maze_env, starting_position, memory_size, elite_memory_size)
     model = LN.LeNetCNN()
-    ADAM = torch.optim.ADAM(model.params, lr  = learning_rate)
-    final_episode = train(maze_env,model, number_of_episodes=1000, discount_rate = 0.95, optimiser = ADAM)
-    agent.replay(final_episode)# animate the actions of the agent in final episode
+    ADAM = torch.optim.Adam(model.parameters(), lr  = learning_rate)
+    final_episode = train(maze_env,model, number_of_episodes=1, discount_rate = 0.95, optimiser = ADAM)
+    print(final_episode)
+    #agent.replay(final_episode)# animate the actions of the agent in final episode
+
+maze_solver()
