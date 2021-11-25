@@ -4,7 +4,7 @@ import collections
 from collections import namedtuple
 import random
 
-Experience = namedtuple('Experience','old_state action new_state initial_reward final_reward action_probability')
+Experience = namedtuple('Experience','old_state action_label new_state values ')
 # use of final_reward is for the elite buffer, it may be removed later
 
 
@@ -49,24 +49,43 @@ class ExperienceBuffer():
 
 class Agent:
     def __init__(self, maze,starting_epsilon,buffer_size, elite_buffer_size = 100):
+        self.position = np.array([1,1])
+        self.environment = maze
         self.epsilon = starting_epsilon
-        self.experience_buffer = ExperienceBuffer(elite_buffer_size)
+        self.replay_buffer = ExperienceBuffer(buffer_size)
         self.elite_experience_buffer = ExperienceBuffer(elite_buffer_size)
         # we use deques for more efficient appends and size capping
-        self.action_space = [[-1,0],[0,1],[1,0],[0,-1]]
+        self.action_space = np.array([[-1,0],[0,1],[1,0],[0,-1]])
+        self.action_space_labels = np.array([0,1,2,3])
         
         #initialise net
     """
-    def choose_step(self, action_index):
-        # we give the agent the action, we let it choose whether to follow it
+    
+    
+    def test_actions(action_probabilities):
+        #remove possibility to step in to wall
+        for (action in range(4)):
+            test_position = agent.position + action_space[action,:]
+            if (maze[test_position[0],test_position_[1]] == -1):
+                     action_probabilities[action] = 0   
+        #renormalise
+        normed_probabilities = probabilities/(sum(probabilities**2))**0.5
+            
+        return (normed_probabilities)
+                     
+    
+    def choose_action(self, probabilities):
+        # implement epsilon-greedy,explotration prob of self.epsilon
+        policy_action_label = np.random.choice(action_space_labels,probabilities)
         
         if np.random.uniform(0,1)<self.epsilon:
-            randmom_index = random.randint(0,3)
-            action = self.action_space.remove(self.action_space[action_index])[random_index]
-            # choose an action at random from the action space with the predicted action exlcuded
-            probability = probabilities.remove(probabilities[action_index])[random_index]
-            # find the corresponding probability for that action
-        return action, probability
+            reduced_action_space_labels = action_space_labels.remove(policy_action_label)
+            reduced_probabilities = probabilities.remove(probabilities[policy_action_label])  
+            random_action_label = np.random.choice(reduced_action_space_lables, reduced_probabilities)
+            random_action = action_space[random_action_label]
+            return random_action, random_action_label
+        else:    
+            return policy_action, policy_action_label
     
     def update_epsilon(number_epsiodes, episode):
         #epsilon should start high and then start to decrease 
