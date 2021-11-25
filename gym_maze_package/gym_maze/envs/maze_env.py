@@ -35,7 +35,7 @@ class MazeEnv(gym.Env):
         # penalise every step that doesnt end in goal state with -1
         return +1 if np.array_equal(self.state,self.goal_state) else -1
         
-    def step(self, agent_action, agent_score):
+    def step(self, agent_action):
         # calc get rewards etc for state transitions
         self.old_state = self.state
         self.state[self.agent_position[0],self.agent_position[1]] = 0  # erase old agent position 3->0
