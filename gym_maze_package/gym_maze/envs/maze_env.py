@@ -1,5 +1,5 @@
 
-import gym # I had to use pip install instead of conda to get gym, do you know why?
+import gym 
 from gym import error, spaces, utils
 from gym.utils import seeding
 from maze_maker_package import maze_maker as mm
