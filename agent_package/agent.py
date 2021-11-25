@@ -52,68 +52,46 @@ class Agent:
         self.position = np.array([1,1])
         self.environment = maze
         self.epsilon = starting_epsilon
+        self.epsilon_lower_bound = starting_epsilon/100
         self.replay_buffer = ExperienceBuffer(buffer_size)
         self.elite_experience_buffer = ExperienceBuffer(elite_buffer_size)
         # we use deques for more efficient appends and size capping
         self.action_space = np.array([[-1,0],[0,1],[1,0],[0,-1]])
         self.action_space_labels = np.array([0,1,2,3])
         
-        #initialise net
-    """
-    
-    
-    def test_actions(action_probabilities):
-        #remove possibility to step in to wall
-        for (action in range(4)):
-            test_position = agent.position + action_space[action,:]
-            if (maze[test_position[0],test_position_[1]] == -1):
-                     action_probabilities[action] = 0   
-        #renormalise
-        normed_probabilities = probabilities/(sum(probabilities**2))**0.5
-            
-        return (normed_probabilities)
-                     
-    
-    def choose_action(self, probabilities):
-        # implement epsilon-greedy,explotration prob of self.epsilon
-        policy_action_label = np.random.choice(action_space_labels,probabilities)
-        
-        if np.random.uniform(0,1)<self.epsilon:
-            reduced_action_space_labels = action_space_labels.remove(policy_action_label)
-            reduced_probabilities = probabilities.remove(probabilities[policy_action_label])  
-            random_action_label = np.random.choice(reduced_action_space_lables, reduced_probabilities)
-            random_action = action_space[random_action_label]
-            return random_action, random_action_label
-        else:    
-            return policy_action, policy_action_label
-    
-    def update_epsilon(number_epsiodes, episode):
-        #epsilon should start high and then start to decrease 
-        expoloration_period= 0.1*number_episodes
-        if (episode < exploration_period):
-            self.epsilon = self.epsilon 
-            # keep epsilon constant for first 10% of runs to encourage exploration early on
-        elif (self.epsilon < self.epsilon_lower_bound):
-            self.epsilon = self.epsilon_lower_bound
-        elif (episode-exploration_period % 100 == 0):
-            self.epsilon *= 0.95**((episode-exploration_period)/100)
-            # reduce epsilon by 5% every 100 episodes
 
+def test_actions(self,action_probabilities):
+    #remove possibility to step in to wall
+    for action in range(4):
+        test_position = self.position + self.action_space[action,:]
+        if (self.environment[test_position[0],test_position[1]] == -1):
+                 action_probabilities[action] = 0   
+    #renormalise
+    normed_probabilities = action_probabilities/(sum(action_probabilities**2))**0.5
+    return (normed_probabilities)
+                 
 
-To do list:
-    Design the algorithm for training with just batches, no elite buffers
-    Learn the syntax and structres of pytorch networks and what they ouput
-    implement ADAM optimizer
-    decide if these should be in the agent class or in their own file.     
+def choose_action(self, probabilities):
+    # implement epsilon-greedy,explotration prob of self.epsilon
+    policy_action_label = np.random.choice(self.action_space_labels,probabilities)
+    policy_action = self.action_space[policy_action_label]
+    if np.random.uniform(0,1)<self.epsilon:
+        reduced_action_space_labels = self.action_space_labels.remove(policy_action_label)
+        reduced_probabilities = probabilities.remove(probabilities[policy_action_label])  
+        random_action_label = np.random.choice(reduced_action_space_labels, reduced_probabilities)
+        random_action = self.action_space[random_action_label]
+        return random_action, random_action_label
+    else:    
+        return policy_action, policy_action_label
 
-
-
-"""
-    
-    
-        
-        
-        
-        
-        
-            
+def update_epsilon(self,episode, number_of_episodes):
+    #epsilon should start high and then start to decrease 
+    exploration_period = 0.1*number_of_episodes
+    if (episode < exploration_period):
+        pass
+        # keep epsilon constant for first 10% of runs to encourage exploration early on
+    elif (self.epsilon < self.epsilon_lower_bound):
+        self.epsilon = self.epsilon_lower_bound
+    elif (episode-exploration_period % 100 == 0):
+        self.epsilon *= 0.95
+        # reduce epsilon by 5% every 100 episodes
