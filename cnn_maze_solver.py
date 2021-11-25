@@ -1,8 +1,9 @@
 #import packages for maze environments
 from maze_maker_package import maze_maker as m
-from agent_package import agent 
+from agent_package import Agent
 import gym
 import LeNet as LN
+import numpy as np
 
 """
 from gym_maze_package import gym_maze
@@ -19,9 +20,6 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 
 
-"""
-TRAINING ALGORITHM PSEUDOCODE
-
 def calculate_values(trajectory_rewards, discount_factor):
     for i in range(len(trajectory_rewards)):
         
@@ -33,34 +31,35 @@ def calculate_values(trajectory_rewards, discount_factor):
         
         return trajectory_rewards
     
-def loss_fn(states, action_labels, values):
+def loss_fn(model,states, action_labels, values):
     loss = 0
-    for i in range(len(rewards)):
+    for i in range(len(values)):
         probability_i = model(states[i])[action_labels[i]]
-        loss -= values[i]*log(probability[i])
+        loss -= values[i]*np.log(probability_i)
     return(loss)
         
 
-def train(maze_env, model,number_episodes, discount_rate, optimiser):
+def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
     # discount rate is tha gamma in most RL formulas, used to encourage efficiency
     # exploration factor gives the proportion of episodes where the agent explores
-    agent = Agent(maze_env.maze,starting epsilon = 0.9,memory_buffer_size = 1000)
+    exploration_period = 0.1*number_of_episodes
+    agent = Agent(maze_env.maze,starting_epsilon = 0.9,memory_buffer_size = 1000)
     last_episode = []
     for episode_number in range(number_of_episodes):
         steps = 0
         total_transitions = 0
-        episode_done = false
+        episode_done = False
         while not episode_done:
-            action_probabilties = model(state)
-            action_probabilies = agent.test_actions(action_probabilities,state) # set invalid action probs to zero, renomalise
-            action, action_label = agent.choose_action(action_probabilties)
+            action_probabilities = model(maze_env.state)
+            action_probabilities = agent.test_actions(action_probabilities,maze_env.state) # set invalid action probs to zero, renomalise
+            action, action_label = agent.choose_action(action_probabilities)
             agent.position += action
             agent.update_epsilon(number_of_episodes, episode_number)
             
             
             #should exploration probabilities be 1/3 or the actual prob? should equal prob from NN 
             state_before, action, state_after, reward, episode_done = maze_env.step(action)
-            agent.replay_buffer.add([state,action_label,state_after,reward])
+            agent.replay_buffer.add([maze_env.state,action_label,state_after,reward])
             
             
             
@@ -68,17 +67,17 @@ def train(maze_env, model,number_episodes, discount_rate, optimiser):
             total_transitions+=1
             if (episode_done):
                 
-                last_episode = memory_buffer[-steps:,1] #list of actions in ep
+                last_episode = agent.replay_buffer[-steps:,1] #list of actions in ep
                 
                 #backprop and calculate state values for trajectory
-                trajectory_values = calculate_values(memory_buffer[-steps:,3])
-                memory_buffer[-steps:,-3] = trajectory_values
+                trajectory_values = calculate_values(agent.replay_buffer[-steps:,3])
+                agent.replay_buffer[-steps:,-3] = trajectory_values
 
                 
-        if ((total_transitions>eploration_period) and (episode_number % 10 == 0 )):
+        if ((total_transitions>exploration_period) and (episode_number % 10 == 0 )):
             #train CNN after every 10 episodes
             
-            training_batch = agent.memory_buffer.r_sample(batch_size)
+            training_batch = agent.memory_buffer.r_sample()
             states = training_batch[:,0]
             action_labels = training_batch[:,1]
             values = training_batch[:,2]
@@ -99,15 +98,7 @@ def maze_solver():
     elite_memory_size = 0.1*memory_size
     agent = Agent(maze_env, starting_position, memory_size, elite_memory_size)
     model = LN.LeNetCNN()
-    optimiser = torch.optim.ADAM(model.params, lr  = learing_rate)
+    ADAM = torch.optim.ADAM(model.params, lr  = learning_rate)
     
-    final_episode = tain(maze_env,model, number_episodes, discount_rate, optimiser)
+    final_episode = train(maze_env,model, number_of_episodes=1000, discount_rate = 0.95, optimiser = ADAM)
     agent.replay(final_episode)# animate the actions of the agent in final episode
-
-
-
-
-"""
-
-
-
