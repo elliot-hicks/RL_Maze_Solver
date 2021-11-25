@@ -28,8 +28,7 @@ class LeNetCNN(Module):
         self.fully_connected_out = Linear(in_features= 500, out_features=classes)
         self.log_softmax = LogSoftmax(dim = 1)
     
-    def forward(self, x):
-        
+    def forward(self, x): 
         x = self.convolutional_1(x)
         x = self.max_pool_1(x)
         x = self.ReLU_1(x)
@@ -44,6 +43,7 @@ class LeNetCNN(Module):
         
         return x
     
+    
 """
  TO DO LIST:
      A few things need adding, this is a very basic CNN architecture,
@@ -52,4 +52,6 @@ class LeNetCNN(Module):
      conv layer, this will be easy, the equation is simply:
          size_i = (in_size_i - kernal_size_i + 2*padding_size_i)/(stride_i) +1
     I just need to implement this in between the conv2d layers and the fc layers
+    figure out why no params present
+    
 """
