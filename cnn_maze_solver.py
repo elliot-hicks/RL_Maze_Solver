@@ -21,14 +21,12 @@ import torchvision.transforms as T
 
 
 def calculate_values(trajectory_rewards, discount_factor):
-    for i in range(len(trajectory_rewards)):
-        
+    for i in range(len(trajectory_rewards)):       
         if (i == 0):
             continue
         else:
             # disount the future rewards and add them to current value
             trajectory_rewards[-i-1]  += discount_factor*trajectory_rewards[-i]
-        
         return trajectory_rewards
     
 def loss_fn(model,states, action_labels, values):
@@ -36,8 +34,7 @@ def loss_fn(model,states, action_labels, values):
     for i in range(len(values)):
         probability_i = model(states[i])[action_labels[i]]
         loss -= values[i]*np.log(probability_i)
-    return(loss)
-        
+    return(loss)    
 
 def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
     # discount rate is tha gamma in most RL formulas, used to encourage efficiency
@@ -55,28 +52,17 @@ def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
             action, action_label = agent.choose_action(action_probabilities)
             agent.position += action
             agent.update_epsilon(episode_number,number_of_episodes)
-            
-            
-            #should exploration probabilities be 1/3 or the actual prob? should equal prob from NN 
             state_before, action, state_after, reward, episode_done = maze_env.step(action)
             agent.replay_buffer.add([maze_env.state,action_label,state_after,reward])
-            
-            
-            
             steps +=1
             total_transitions+=1
             if (episode_done):
-                
                 last_episode = agent.replay_buffer[-steps:,1] #list of actions in ep
-                
                 #backprop and calculate state values for trajectory
                 trajectory_values = calculate_values(agent.replay_buffer[-steps:,3])
                 agent.replay_buffer[-steps:,-3] = trajectory_values
-
-                
         if ((total_transitions>exploration_period) and (episode_number % 10 == 0 )):
             #train CNN after every 10 episodes
-            
             training_batch = agent.memory_buffer.r_sample()
             states = training_batch[:,0]
             action_labels = training_batch[:,1]
@@ -85,8 +71,8 @@ def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
             optimiser.zero_grad()
             loss.backward()
             optimiser.step()
-                
-            
+        maze_env.reset()
+        
     return last_episode
             
             
@@ -99,6 +85,5 @@ def maze_solver():
     agent = Agent(maze_env, starting_position, memory_size, elite_memory_size)
     model = LN.LeNetCNN()
     ADAM = torch.optim.ADAM(model.params, lr  = learning_rate)
-    
     final_episode = train(maze_env,model, number_of_episodes=1000, discount_rate = 0.95, optimiser = ADAM)
     agent.replay(final_episode)# animate the actions of the agent in final episode
