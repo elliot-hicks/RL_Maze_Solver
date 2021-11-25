@@ -54,7 +54,7 @@ def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
             action_probabilities = agent.test_actions(action_probabilities,maze_env.state) # set invalid action probs to zero, renomalise
             action, action_label = agent.choose_action(action_probabilities)
             agent.position += action
-            agent.update_epsilon(number_of_episodes, episode_number)
+            agent.update_epsilon(episode_number,number_of_episodes)
             
             
             #should exploration probabilities be 1/3 or the actual prob? should equal prob from NN 
