@@ -118,4 +118,4 @@ def build_maze(width=28,height=28):
     maze = -1* finalise_maze(maze_init) #insert reward for being in forbidden state 
     maze[-2,-2] = +1 # insert rewards for being in goal state
     return maze
-            
+  
