@@ -75,7 +75,6 @@ def train(maze_env, model,number_of_episodes, discount_rate, optimiser):
         
     return last_episode
             
-            
 def maze_solver():
     maze_env = gym.make('maze-v0')
     starting_position = [1,1]
