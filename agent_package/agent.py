@@ -1,74 +1,73 @@
+"""
+I, Elliot Hicks, have read and understood the School's Academic Integrity
+Policy, as well as guidance relating to this module, and confirm that this
+submission complies with the policy. The content of this file is my own
+original work, with any significant material copied or adapted from other
+sources clearly indicated and attributed.
+Author: Elliot Hicks
+Project Title: RL_CNN_maze_solver
+Date: 13/12/2021
+"""
+
 import numpy as np
-import matplotlib.pyplot as plt
-import collections
-from collections import namedtuple
-import random
 
-
-# use of final_reward is for the elite buffer, it may be removed later
 
 def normalise(vector):
-        return(vector/(sum(vector)))
+    return(vector / (sum(vector)))
+
 
 class ExperienceBuffer():
-    """
-    Experience buffer is bascially a short-term memory for a netural network
-    from which it can select random samples to learn from and stabalize learning
-    Limited slicing abilities meant that deques were replaced with numpy nd
-    arrays. Fucntions added to class to simulate deque funcionality
-    """
+
     def __init__(self, capacity):
-        """
-        Parameters
-        ----------
-        capacity : int
-            The capacity of the networks 'memory' 
-        
-        """
         self.capacity = capacity
-        self.memory_buffer = np.ndarray((0,4))
-        self.size = len(self.memory_buffer) # current size of the memory buffer
-        
-        
-    def __getitem__(self,index):
-        #override index operator to return slice of memory_buffer
+        self.memory_buffer = np.ndarray((0, 4))
+        self.size = len(self.memory_buffer)  # current memory buffer size
+
+    def __getitem__(self, index):
+        # Override index operator to return slice of memory_buffer
         return self.memory_buffer[index]
-            
+
     def is_full(self):
-            return self.size >= self.capacity
-        
+        return self.size >= self.capacity
+
     def add(self, experience):
+        # Mimic deque functionality, ndarray with a capacity.
         if (self.size == self.capacity):
             # if at capacity, remove first entry
-           self.memory_buffer =  np.delete(self.memory_buffer, (0), axis = 0 )
+            self.memory_buffer = np.delete(self.memory_buffer, (0), axis=0)
         else:
-            self.size+=1
+            self.size += 1
         self.memory_buffer = np.vstack((self.memory_buffer, experience))
-        
-        
-    def update_values(self,episode_steps, values):
-        """During training, values must be backpropagated after episodes finish
-        so memory buffer can go back to the last n = episode_steps steps and 
-        correct the values"""
-        self.memory_buffer[-episode_steps:,3] = values
-        
-    def random_batch(self, batch_size = 600):
+
+    def update_values(self, episode_steps, values):
+        """
+        Before backpropagation, rewards are updated for the last episode using:
+
+            R_{t'} = SUM_{t = t'}^{T}(r_t*discount_factor^{t'-t})
+
+        This function updates the memory buffer's rewards to these values for
+        the corresponding episode:
+        """
+        self.memory_buffer[-episode_steps:, 3] = values
+
+    def random_batch(self, batch_size=600):
         """
         Parameters
         ----------
         batch_size : int,
-            Hyperparameter: how many experiences we should look at during the 
-            batch training, introduced to stabalize training.The default is 100.
+            Hyperparameter: how many transitions used in each batch training of
+            CNN, introduced to stabalize training.
         Returns
         -------
         batch: list of Experiences
         """
-        
-        rand_indices = np.random.choice(len(self.memory_buffer),size = batch_size, replace = False)
-        #print(rand_indices)
-        batch = self.memory_buffer[rand_indices,:]
+
+        rand_indices = np.random.choice(self.size,
+                                        size=batch_size,
+                                        replace=False)
+        batch = self.memory_buffer[rand_indices, :]
         return batch
-            
+
 
 class Agent:
     def __init__(self, maze,exploration_period, starting_epsilon,buffer_size, elite_buffer_size = 600):
