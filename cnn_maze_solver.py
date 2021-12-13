@@ -1,10 +1,18 @@
-# import packages for maze environments
+"""
+I, Elliot Hicks, have read and understood the School's Academic Integrity
+Policy, as well as guidance relating to this module, and confirm that this
+submission complies with the policy. The content of this file is my own
+original work, with any significant material copied or adapted from other
+sources clearly indicated and attributed.
+Author: Elliot Hicks
+Project Title: RL_CNN_maze_solver
+Date: 13/12/2021
+"""
 from agent_package import agent as a
 from CNN10 import CNN10 as CN
 import gym
 import torch
 import numpy as np
-import matplotlib.pyplot as plt
 
 env = gym.make("maze-v0")
 
@@ -37,7 +45,25 @@ def calculate_values(trajectory_rewards, discount_factor):
 
 
 def loss_fn(model, states, action_labels, values):
+    """
+    Parameters
+    ----------
+    model : PyTorch Module object
+        CNN designed to take single channel 10x10 images
+    states : list of  NumPy ndarrays
+        List of states from randomly sampled transitions
+    action_labels : int
+        encoded labels for actions: 0,1,2,3 = "up", "right", "left", "down"
+    values : list of floats
+        Discunted rewards along trajectories which have been randomly sampled
 
+    Returns
+    -------
+    loss : Torch 1D Tensor
+        Calculated using 0-bias loss funtion , inspired by REINFORCE paper:
+            https://link.springer.com/article/10.1023/A:1022672621406
+
+    """
     loss = 0
     for i in range(len(values)):
         probability_i = model(states[i])
