@@ -69,6 +69,34 @@ class ExperienceBuffer():
         return batch
 
 
+class EliteExperienceBuffer(ExperienceBuffer):
+    """
+    The elite memory class intuituvely inherits a lot of ExperienceBuffer
+    properties, so it is inherited. Needs access to the agents ExperienceBuffer
+    to access memories so is passed a reference to the agent in __innit__.
+    """
+
+    def __init__(self, agent, capacity):
+        super().__init__(capacity)
+        self.agent = agent
+
+    def add_last_episode(self, n_steps):
+        # Add the last n steps (n = steps), to the elite buffer
+        if self.is_full():
+            if n_steps < max(self.agent.elite_steps):
+                add_new_elite_memory = True
+            else:
+                add_new_elite_memory = False
+        else:
+            add_new_elite_memory = True
+
+        if add_new_elite_memory:
+            print("Elite memory found!")
+            self.agent.elite_steps.append(n_steps)
+            for i in range(1, n_steps + 1):
+                self.add(self.agent.replay_buffer.memory_buffer[-i, :])
+
+
 class Agent:
 
     def __init__(self, maze, exploration_period,
@@ -81,7 +109,7 @@ class Agent:
         self.epsilon = starting_epsilon
         self.epsilon_lower_bound = starting_epsilon / 100
         self.replay_buffer = ExperienceBuffer(buffer_size)
-        self.elite_experience_buffer = ExperienceBuffer(elite_buffer_size)
+        self.elite_experience_buffer = EliteExperienceBuffer(self, elite_buffer_size)
         self.elite_steps = []
         # we use deques for more efficient appends and size capping
         self.action_space = np.array([[-1, 0], [0, 1], [1, 0], [0, -1]])
@@ -149,20 +177,3 @@ class Agent:
         elif ((episode-self.exploration_period) % 10 == 0):
             print("epsilon reduced")
             self.epsilon *= 0.9
-
-    def update_elite_buffer(self, n_steps):
-        # Add the last n steps (n = steps), to the elite buffer
-        if self.elite_experience_buffer.is_full():
-            if n_steps < max(self.elite_steps):
-                add_new_elite_memory = True
-            else:
-                add_new_elite_memory = False
-        else:
-            add_new_elite_memory = True
-
-        if add_new_elite_memory:
-            print("Elite memory found")
-            self.elite_steps.append(n_steps)
-            for i in range(1, n_steps + 1):
-                self.elite_experience_buffer.add(
-                    self.replay_buffer.memory_buffer[-i, :])
