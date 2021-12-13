@@ -170,7 +170,8 @@ All possible improvements are listed below:
 
 ## ```agent.py```:
 This will contain an Agent class that will solve a given maze from the **```maze_maker```** library using Q-learning techniques.
-* The agent class was revised following the introduction of the OpenAI and Gym libraries [openAI/Gym custom gym environment: 'maze_env'](#openAI/Gym-custom-gym-environment:-'maze_env':).
+* The agent class was revised following the introduction of the OpenAI and Gym libraries 
+* [openAI/Gym custom gym environment: 'maze_env'](#openAI/Gym-custom-gym-environment:-'maze_env':).
 
 ## ```ExperienceBuffer```:
 In order to train a CNN to solve these mazes, I want to give it a short-term memory, this comes in the form of the 
@@ -401,20 +402,81 @@ Note that maxpooling was removed, this was becauseit was anticipated that decrea
 cause too much information loss, making this a Fully Convolutional net. Unfortunately, this is where the most
 doubt lies, as is there is no correct answer for the CNN architecure, only ones that work, and ones that dont.
 
-# cnn_maze_solver.py
+## cnn_maze_solver.py
+This file contains the training algorithm for the project and code for making an animation of the best route achieved
+in the training process. The training process is inspired by the work done in the original 
+[REINFORCE](https://link.springer.com/article/10.1023/A:1022672621406) paper. The rewards function is -1 for 
+any step not resulting in the goal state, and +10 for a step that does. The training is as follows:
+* Initialise maze environment using maze_maker and the gym_maze_packages to make the env.
+* Use CNN10 to initialise the CNN that approximates the policy function
+* Set optimisers as ADAM and learning rate as 1e-4
+* train the CNN using ```train()```
+The loss function used in this model is:
+<p align="center">
+  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
+</p>
+(Above created using codecogs).
+This corresponds to a zero-bias value approximation as seen in the REINFORCE paper. Here i indexs over the random batch
+taken from the agent memory buffers. This method of random sampling is supposed to improve stability in training.
+The loss is backpropagated using the usual PyTorch functions, ```optimiser.zero_grad, loss.backward, optimser.step```.
+The training code is too long to be shown here but is avaiable in full in the ```cnn_maze_solver.py``` file. 
+The CNN is trained every 5 episodes using the main memory buffer, and every 10 episodes with the elite buffer, once the
+exploration period has concluded. The number of episoded ran can be changed in the ```maze_solver``` function, it is
+recommended that the memory buffer size is less than exploration_period*max_steps, such that the exploration period
+is fully utilised, this can be tuned either way but I recommend setting the exploration period by hand depending on 
+the maze size. The same applies for the max_steps as more difficult mazes will require more steps.
 
-## cnn_maze_solver.py status:
+The ```train``` function prints statements continuously in the following form:
+```console
+|Episode = 10 | Steps = 50 | Epsilon = 1.00 |
+```
+Where we see the current episode number, the number of steps taken in that episode to complete the trajectory, and
+the epsilon value for that episode.  Print statements are also made when successful runs are found, i.e. 
+the agent completes the maze: SUCCESS, and when it fails: TIMED OUT.
+
+Several diagnostic lists are made, including 
+* episode_steps : Number of steps in each episode during the training
+* episode_av_reward: Average reward along each episode
+* shortest_length: The length of the best route, found using min(episdode_steps)
+* best_episode: The episode which corresponds to the best solution, found using np.argmin(episode_steps)
+
+These can be used to determine if the CNN is improving:
+* episode_steps trending downwards suggests improvements
+* episode_av_reward trending upwards suggests improvements
+* best_episode must be as small as possible, min value for any 10x10 maze is 19. 
+### cnn_maze_solver.py status:
 The cnn_maze_solver.py file is comlpete.
 
+## CNN_maze_solver performance:
+
+The cnn_maze_solver.py appears to work occassionally, training is very unstable, but when forced in to a very simple situation
+the agent does learn, however it is far too slow to be useful considering we are only working with 10x10 mazes. I believe
+its likely due to the hyperparameters and architecture of the CNN being used. Given more time I would be able to 
+further test different combinations of the parameters such as:
+* ECNN10 architecture
+* number of episodes
+* epsilon scheme
+* exploration period
+* rewards scheme
+* buffer sizes (Elite and normal)
+ There was evidence of learning in some cases as shown by the following plot of steps vs episode. 
+The steps were rolling averaged over 50 values:
+<p align="center">
+  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements.png">
+</p>
+Another example of learning is shown by:
+[improvements_steps](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements_steps.png)
+[improvements_maze](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png)
+
 # Roadmap
-- [x] Design Maze_maker package (:exclamation: introduce pickle to save mazes),
+- [x] Design Maze_maker package,
 - [x] Visualise Maze,
-- [X] Finish maze_env (:exclamation: installation bug)
-- [x] Build Agent package (now with the new pytorch involvment, this should be made fairly quickly),
-- [x] Build CNN package (:exclamation: use equation in file to make flexible architecture)
-- [x] Design batch learning algorithm 
+- [X] Finish maze_env,
+- [x] Build Agent package,
+- [x] Build CNN package,
+- [x] Design batch learning algorithm,
 - [x] Testing:
-  - [x] Testing is now expected to comprise curriculum learning 
+  - [x] Testing is now expected to comprise curriculum learning,
 - [x] Improve training with the addition of 'elite batches'
 
 
@@ -428,7 +490,7 @@ One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](http
 1. T. Mitchell, 'Machine Learning, International Student Edition', 1997, p.367-387 [Mitchell](http://www.cs.cmu.edu/~tom/mlbook.html)
 2. P. Wilmott, 'Machine Learning: An Applied Mathematics Introduction, 2020, p.173-215 [Willmott](https://www-tandfonline-com.nottingham.idm.oclc.org/doi/full/10.1080/14697688.2020.1725610) 
 3. A. Poddar, 'Making a custom environment in gym', 2019, [Poddar](https://medium.com/@apoddar573/making-your-own-custom-environment-in-gym-c3b65ff8cdaa)
-
+4. R.J.Williams, 'Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning', 1992, [REINFORCE](https://link.springer.com/article/10.1023/A:1022672621406)
 # Comments/ Questions:
 
 1. Given the size of this README.md growing so fast, should I start splitting this in to smaller readme files within the correspoding packages and retain this as a broader overview of the project? I want to make sure I'm following the 'style' used in github.
