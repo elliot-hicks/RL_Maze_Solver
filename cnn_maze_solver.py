@@ -8,13 +8,16 @@ Author: Elliot Hicks
 Project title: RL_CNN_maze_solver
 Date: 13/12/2021
 """
-from agent_package import agent as a
+from agent_package import agent as ag
 from CNN10 import CNN10 as CN
 import gym
+from gym_maze_package import gym_maze
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
-env = gym.make("maze-v0")
+env = gym.make('maze-v0')
 
 
 def calculate_values(trajectory_rewards, discount_factor):
@@ -40,7 +43,6 @@ def calculate_values(trajectory_rewards, discount_factor):
         # disount the future rewards and add them to current value
         trajectory_rewards[-i - 1] += discount_factor * trajectory_rewards[-i]
         i += 1
-    print("Rewards mean:", np.mean(trajectory_rewards))
     return trajectory_rewards
 
 
@@ -97,21 +99,19 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
 
     """
     buffer_size = 3000  # Agent main memory buffer capacity
-    exploration_period = 200  # Number of episodes in exploration period
-    agent = a.Agent(
+    exploration_period = 20  # Number of episodes in exploration period
+    agent = ag.Agent(
         maze_env.original_maze,
         exploration_period,
         starting_epsilon=1,
         buffer_size=buffer_size,
     )  # Build agent
-    last_episode = []  # List of actions for replay
+    best_trajectory = []
     episode_number = 0
 
     while episode_number < number_of_episodes:
-        print(episode_number)
         maze_env.reset()  # Start/Restart maze
         agent.position = np.array([1, 1])  # Set/Reset agent position
-
         total_transitions = 0
         episode_done = False
         while not episode_done:
@@ -127,11 +127,11 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
             total_transitions += 1
 
             if episode_done:
-                print("Episode: ", episode_number)
-                print("Epsilon:", agent.epsilon)
-                print("Steps: ", maze_env.step_count)
+                print(("| Episode Number: {0} | Steps: {1} " +
+                       "| Epsilon: {2:.2f} |").format(episode_number,
+                                                      maze_env.step_count,
+                                                      agent.epsilon))
                 episode_steps.append(maze_env.step_count)
-                # last_episode = agent.replay_buffer[-steps:,1] #list of actions in ep
                 #  Update trajctory values using discounted rewards:
                 updated_trajectory_values = calculate_values(
                     agent.replay_buffer[-maze_env.step_count:, 2],
@@ -145,9 +145,10 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
 
                 # Test 'elite' trajectories and store their transitions:
                 if maze_env.step_count < np.percentile(episode_steps, 10):
-                    print(maze_env.step_count)
-                    agent.update_elite_buffer(maze_env.step_count)
-                    print(agent.elite_experience_buffer.size)
+                    agent.elite_experience_buffer.add_last_episode(maze_env.step_count)
+                if maze_env.step_count == min(episode_steps):
+                    best_trajectory = agent.replay_buffer[-maze_env.step_count:, 0]
+
         #  Update epsilon according to epsilon scheme:
         agent.update_epsilon(episode_number, number_of_episodes)
 
@@ -162,11 +163,8 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
             optimiser.zero_grad()
             loss.backward()
             optimiser.step()
-        if (
-            agent.elite_experience_buffer.is_full()
-            and exploration_over
-            and (episode_number % 10 == 0)
-        ):
+        if (agent.elite_experience_buffer.is_full() and exploration_over and
+            (episode_number % 10 == 0)):
             # Train CNN after every 10 episodes:
             training_batch = agent.elite_experience_buffer.random_batch(400)
             states = training_batch[:, 0]
@@ -178,7 +176,8 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
             optimiser.step()
         #  Increment episode counter:
         episode_number += 1
-    return (episode_steps, episode_av_reward)
+    return (episode_steps, episode_av_reward, maze_env.original_maze,
+            best_trajectory)
 
 
 def maze_solver():
@@ -191,21 +190,44 @@ def maze_solver():
         Decreasing trend implies learning
     """
 
-    maze_env = gym.make("maze-v0")
+    maze_env = gym.make('maze-v0')
     learning_rate = 1e-4  # Hyperparameter for optimiser
     model = CN.ECNN10(1, 4).float()
     ADAM = torch.optim.Adam(model.parameters(), lr=learning_rate)
     steps = train(maze_env,
                   model,
-                  number_of_episodes=2000,
+                  number_of_episodes=300,
                   discount_factor=0.95,
                   optimiser=ADAM)
-    # print(final_episode)
-    # agent.replay(final_episode)
-    # animate the actions of the agent in final episode
+
     return steps
+
+
+def animate_imshow(frame):
+    image.set_array(best_trajectory[frame])
+    return [image]
 
 
 episode_steps = []
 episode_av_reward = []
-steps, rewards = maze_solver()
+steps, rewards, maze, best_trajectory = maze_solver()
+shortest_length = len(best_trajectory)
+best_episode = np.argmin(steps)
+figure = plt.figure()
+plt.axis("off")
+plt.title("RL_CNN_maze_solver best solution:" +
+          " \nEpisode {0} (steps = {1})".format(best_episode, shortest_length))
+image = plt.imshow(best_trajectory[0], interpolation='none')
+animated_maze = animation.FuncAnimation(figure, animate_imshow,
+                                        len(best_trajectory)-1,
+                                        interval=200)
+
+figure.show()
+
+"""
+Implementation of a user function where they can load/save mazes with pickle
+and possibly open up a file explorer GUI would be the final step in this code.
+The code has no user functions, this was not the plan but priority was given to
+getting the model working. Unfortunately, I was unable to stabalize training in
+time.
+"""
