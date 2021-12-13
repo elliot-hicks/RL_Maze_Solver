@@ -5,7 +5,7 @@ submission complies with the policy. The content of this file is my own
 original work, with any significant material copied or adapted from other
 sources clearly indicated and attributed.
 Author: Elliot Hicks
-Project Title: RL_CNN_maze_solver
+Project title: RL_CNN_maze_solver
 Date: 13/12/2021
 """
 from agent_package import agent as a
@@ -67,9 +67,8 @@ def loss_fn(model, states, action_labels, values):
     loss = 0
     for i in range(len(values)):
         probability_i = model(states[i])
-        # loss -= torch.mul(torch.log(probability_i[0][action_labels[i]]),values[i])
-        loss -= torch.mul(torch.log(probability_i[action_labels[i]]), values[i])
-    print(loss)
+        loss -= torch.mul(torch.log(probability_i[0][action_labels[i]]),
+                          values[i])
     return loss
 
 
@@ -117,7 +116,7 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
         episode_done = False
         while not episode_done:
             # Map state to action probabilities using policy function:
-            action_probabilities = model(maze_env.state).detach().numpy()  # [0]
+            action_probabilities = model(maze_env.state).detach().numpy()[0]
             # Set invalid action probs to zero, renomalise:
             action_probabilities = agent.test_actions(action_probabilities)
             # Choose action according to epsilon-greedy:
@@ -135,12 +134,12 @@ def train(maze_env, model, number_of_episodes, discount_factor, optimiser):
                 # last_episode = agent.replay_buffer[-steps:,1] #list of actions in ep
                 #  Update trajctory values using discounted rewards:
                 updated_trajectory_values = calculate_values(
-                    agent.replay_buffer[-maze_env.step_count :, 2], discount_factor
-                )
+                    agent.replay_buffer[-maze_env.step_count:, 2],
+                    discount_factor)
                 #  Update rewards column of memory buffer with new values:
                 agent.replay_buffer.update_values(
-                    maze_env.step_count, updated_trajectory_values
-                )
+                    maze_env.step_count,
+                    updated_trajectory_values)
                 #  Track progress by logging trajectory rewards:
                 episode_av_reward.append(np.mean(updated_trajectory_values))
 
@@ -196,9 +195,11 @@ def maze_solver():
     learning_rate = 1e-4  # Hyperparameter for optimiser
     model = CN.ECNN10(1, 4).float()
     ADAM = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    steps = train(
-        maze_env, model, number_of_episodes=2000, discount_factor=0.95, optimiser=ADAM
-    )
+    steps = train(maze_env,
+                  model,
+                  number_of_episodes=2000,
+                  discount_factor=0.95,
+                  optimiser=ADAM)
     # print(final_episode)
     # agent.replay(final_episode)
     # animate the actions of the agent in final episode
