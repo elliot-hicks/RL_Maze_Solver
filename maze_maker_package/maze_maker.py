@@ -1,3 +1,13 @@
+"""
+I, Elliot Hicks, have read and understood the School's Academic Integrity
+Policy, as well as guidance relating to this module, and confirm that this
+submission complies with the policy. The content of this file is my own
+original work, with any significant material copied or adapted from other
+sources clearly indicated and attributed.
+Author: Elliot Hicks
+Project Title: RL_CNN_maze_solver
+Date: 13/12/2021
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import random
