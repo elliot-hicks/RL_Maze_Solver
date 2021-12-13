@@ -72,8 +72,9 @@ class ExperienceBuffer():
 class EliteExperienceBuffer(ExperienceBuffer):
     """
     The elite memory class intuituvely inherits a lot of ExperienceBuffer
-    properties, so it is inherited. Needs access to the agents ExperienceBuffer
-    to access memories so is passed a reference to the agent in __innit__.
+    properties, so it is inherited. Needs access to the agent that owns it's
+    ExperienceBuffer to access memories so is passed a reference to the agent
+    in __innit__.
     """
 
     def __init__(self, agent, capacity):
@@ -91,7 +92,7 @@ class EliteExperienceBuffer(ExperienceBuffer):
             add_new_elite_memory = True
 
         if add_new_elite_memory:
-            print("Elite memory found!")
+            print("##### SAVED AS ELITE MEMORY ##### ")
             self.agent.elite_steps.append(n_steps)
             for i in range(1, n_steps + 1):
                 self.add(self.agent.replay_buffer.memory_buffer[-i, :])
@@ -175,5 +176,5 @@ class Agent:
             self.epsilon = self.epsilon_lower_bound
         # Decrease epsilon by 10% every 10 eps past exploration period:
         elif ((episode-self.exploration_period) % 10 == 0):
-            print("epsilon reduced")
+            print("\nEpsilon reduced.")
             self.epsilon *= 0.9
