@@ -465,8 +465,9 @@ The steps were rolling averaged over 50 values:
   <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements.png">
 </p>
 Another example of learning is shown by:
-[improvements_steps](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements_steps.png)
-[improvements_maze](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png)
+
+![improvements_steps](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements_steps.png)
+![improvements_maze](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png)
 
 # Roadmap
 - [x] Design Maze_maker package,
