@@ -462,12 +462,17 @@ further test different combinations of the parameters such as:
  There was evidence of learning in some cases as shown by the following plot of steps vs episode. 
 The steps were rolling averaged over 50 values:
 <p align="center">
-  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements.png">
+  <img width="400" height="200" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements.png">
 </p>
 Another example of learning is shown by:
-
-![improvements_steps](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements_steps.png)
-![improvements_maze](https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png)
+<p align="center">
+  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/Possible_improvements_steps.png">
+</p>
+Here a general trend is shown with the steps decreasing,suggestin the agent learning. However, inspection of the maze 
+shows it was a very simple situation. However, there is again evidence of learning, just very slow learning.
+<p align="center">
+  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png">
+</p>
 
 # Roadmap
 - [x] Design Maze_maker package,
