@@ -20,7 +20,12 @@
 
 RL_Maze_Solver will demonstrate the ability of reinforcement learning (specifically Q-learning)
 by randomly generating 2D mazes and tasking an agent to find its most efficient solution. 
-Mazes are made with the maze_maker.py package I wrote and allow for 2D mazes with multiple routes to be made.
+Mazes are made with the maze_maker.py package I wrote and allow for 2D mazes with multiple routes to be made. The design
+of the project was made with generality in mind, this code could easily be tweaked to have solve problems where the goal
+and starting states are varied randomly. Unfortunately, convergence to an optimal policy was not achieved. The reasons 
+for this will me mentioned in the conclusion section.
+
+
 As the project has grown in complexity, restructuring has been vital for organisation.
 List of main components and their purposes:
 ### maze_maker_package:
@@ -30,19 +35,19 @@ This package generates recursive mazes.
 ### gym_maze_package:
 This is the package that converts the maze produced by maze_maker to a suitable gym environment for pytorch implementation
 
-### LeNet_package:
-This is a package designed to make a CNN with adjustable input sizes, designed to be trained to solve the maze by learning
-the optimal policy.
+### CNN10:
+This is a package designed to make a CNN (ECNN10) which can take in a 10x10 single channel maze, designed to be trained to solve 
+the maze by learning the optimal policy.
 
 ### agent_package: 
 This package contains the design for the Agent class. This class' purpose is to navigate the maze using the network
-for its policy.
+for its policy. It also contains the ExperienceBuffer and EliteExperienceBuffer classes.
 
 ### cnn_maze_solver.py:
 This is where all the packages are combined:
   * the previous packages are used to create the setup for the RL task.
-  * A training algorithm is employed to train the LeNet to produce an optimal policy function.
-  * The Solution is plotted.
+  * A training algorithm is employed to train the ECNN10 to produce an optimal policy function.
+  * The best solution found is animated using matplotlib animate
 # Installation
 Information on packages/ environments will be made available here:
 
@@ -53,11 +58,21 @@ Required Packages:
 * **Matplotlib.pyplot**
 * **maze_maker**:
 * **gym_maze_package**
-* **LeNet_package**
+* **CNN10**
 * **agent_package**
 * **collections**
 * **gym**
 * **Pytorch**
+
+In order to install maze_gym to create the custom gym environment, maze_maker must first be installed using pip install
+in the maze_maker_package directory:
+```shell
+...\maze_maker_package>pip install -e . maze_maker
+```
+Following this, the gym-maze package can be installed using the following in the gym_maze_package directory:
+```shell
+...\gym_maze_package>pip install -e .gym_maze
+```
 
 # Usage
 # maze_maker_package
@@ -128,7 +143,7 @@ return maze
 
 Mazes are currently visualised using [matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html) from the matplotlib library. Values for pixels are:
 * Tunnell: 0
-* Wall: 1
+* Wall: -1
 * Start ([0,0], top left): 3 
 * Goal ([-1,-1], bottom right): 4
 ```python
@@ -145,12 +160,11 @@ def show(maze):
 
 
 ## maze_maker Status:
-The maze_maker file is now finished, I dont predict any changed needing to be made however some useful extensions are
-anticipated.
+The maze_maker file is now finished. Unfortunately, an appication of pickle was not completed due to comlpications in 
+other parts of the project.
 All possible improvements are listed below:
-1. Add pickle or start using seeds, veering towards use of pickle so i can also save NN parameters.
-2. Add exception handling for stupid maze inputs
-
+1. Add pickle or start using seeds, veering towards use of pickle so we could also save NN parameters.
+2. Add exception handling for invalid maze inputs
 
 # agent_package:
 
@@ -160,22 +174,24 @@ This will contain an Agent class that will solve a given maze from the **```maze
 
 ## ```ExperienceBuffer```:
 In order to train a CNN to solve these mazes, I want to give it a short-term memory, this comes in the form of the 
-ExperienceBuffer class. This is essentially a deque from *collections* which is an array with a fixed capacity. 
-Any transitions made by the Agent class will be recorded in the Experience buffer. To fill the buffer with experiences
-a *namedtuple* (also from *collections*) has been introduced:
-```python 
-Experience = namedtuple('Experience','old_state action new_state initial_reward final_reward')
-```
-Here we add where the agent was, its action, the resulting state, the intial reward from the action and the final reward.
-the final reward corresponds to the score of the agent at the end of the episode, its key to creating [elite buffers](#elite buffers).
+ExperienceBuffer class. Originally, a deque object from *collections* was used, but this class had very limited slicing
+features, so a NumPy ndarray was used instead. Any transitions made by the Agent class will be recorded in the
+experience buffer. 
+The buffer contains transitions, tuples of (s,a,r,d), where:
+* s = state (before action)
+* a = action taken in state s
+* r = reward from action a in state s
+* d = done flag, a bool telling us whether the trajectory is finished.
 
-The ExperienceBuffer class has (currently) three main attributes:
+The (s,a,r) tuples are key to the training process, the done flag is used to isolate individual trajectories/ episodes.
+
+The ExperienceBuffer class has three main attributes:
 1. capacity (int): How many experiences the deque can hold, this is analogous to how short or long the networks memory is.
-2. memory_buffer (deque): the actual deque for experiences with maxlen = capacity,
+2. memory_buffer (NumPy ndarray): the actual memory store with maxlen = capacity,
 3. size (int): the length of the memory_buffer, once size = capacity, training can start.
 
-The ExperienceBuffer has three main methods:
-1. ```__innit__```:
+The ExperienceBuffer has three useful methods:
+1. ```__init__```:
 ```python 
 def __init__(self, capacity):
       self.capacity = capacity
@@ -185,7 +201,13 @@ def __init__(self, capacity):
 2. ```add```:
 ```python 
 def add(self, experience):
-      self.memory_buffer.append(experience) #add to right of buffer
+        # Mimic deque functionality, ndarray with a capacity.
+        if (self.size == self.capacity):
+            # if at capacity, remove first entry
+            self.memory_buffer = np.delete(self.memory_buffer, (0), axis=0)
+        else:
+            self.size += 1
+        self.memory_buffer = np.vstack((self.memory_buffer, experience))
 ```
 3. ```random_sample_batch```
 ```python 
@@ -193,127 +215,153 @@ def random_sample_batch(self, batch_size = 100):
         batch = random.sample(self.memory_buffer,batch_size)
         return batch
 ```
-## Elite buffers:
+There is also an ```python update_values``` function which rewrites the rewards column of the experience buffer for the
+last N steps, where N is the length of the last episode.
+
+## ```EliteExperienceBuffer```:
 In order to improve training of the CNN, many training regimens employ an 'elite buffer', a buffer of transitons/experiences
 that were part of particularly good episodes (say the top 10% of all final scores). The memories in this buffer are
 protected, their existence in the CNNs memory extended, so that they can reinforce its behaviour for a longer amount of
-time. 
+time. The experience buffer was finally implemented in an attempt to improve learning, it initially takes trajectories
+that are in the top 10% and checks if they are better than any other trajectories stored in the EliteBuffer. 
+The addition of a new elite memory does not remove the poorest of the elite memories to free
+up space, instead any elite memory is removed, including possibly the best, from the elite buffer. This stops trajectories
+being used too much.
 
-I havent decided yet if I will implement this. It is of course a great addition, however I want to solve employing the 
-normal batch learning before introducing more complex models like this.
+The EliteExperienceBuffer is a type of ExperienceBuffer with harsher terms for adding memories, due to this 
+relationship, the EliteExperienceBuffer is inherited from the ExperienceBuffer class. Agents will therefore contain
+an ExperienceBuffer and EliteExperienceBuffer which work in tandem. In order to give the elite buffer access to the
+normal buffers trajectories, a reference of the agent is passed in the EliteExperienceBuffers ```python init```.
+```python
+    def __init__(self, agent, capacity):
+        super().__init__(capacity)
+        self.agent = agent
 
-## the epsilon-greedy approach:
-A pseudo code for the agent behaviour is now present, the code tells the agent to follow the policy with prob 1-epsilon
-and to pick one of the alterantive actions at random with probability epsilon. Epsilon is planned to decrease as time 
-goes on, with exploration initially being large such that the agent explores and gives the network new data. After some 
-exploration period, the agent's epsilon value begins decreasing by 5% every 100 episodes. Epsion is
-given a lower bound which will be small.This is so that the agent becomes more reliant on the policy as time goes on 
-and the policy improves. 
-
-Epsilon greedy approach pseudocode:
-
-```python    
-    def choose_exploration(self):
-        #use epsilon-greedy for eploration vs exploitation trade off
-        return True if np.random.uniform(0,1)<self.epsilon else False
-                 
-    def choose_step(self,neural_net):
-        
-        action = neural_net.model(state)
-        if choose_exploration:
-            action = random.choice(action_space - action)
-        return action
-    
-    def update_epsilon(number_epsiodes, episode):
-        #epsilon should start high and then start to decrease 
-        expoloration_period= 0.1*number_episodes
-        if (episode < exploration_period):
-            self.epsilon = self.epsilon 
-            # keep epsilon constant for first 10% of runs to encourage exploration early on
-        elif (self.epsilon < self.epsilon_lower_bound):
-            self.epsilon = self.epsilon_lower_bound
-        elif (episode-exploration_period % 100 == 0):
-            self.epsilon *= 0.95**((episode-exploration_period)/100)
-            # reduce epsilon by 5% every 100 episodes
-
+    def add_last_episode(self, n_steps):
+        # Add the last n steps (n = steps), to the elite buffer
+        if self.is_full():
+            if n_steps < max(self.agent.elite_steps):
+                add_new_elite_memory = True
+            else:
+                add_new_elite_memory = False
+        else:
+            add_new_elite_memory = True
+        if add_new_elite_memory:
+            self.agent.elite_steps.append(n_steps)
+            for i in range(1, n_steps + 1):
+                self.add(self.agent.replay_buffer.memory_buffer[-i, :])
 ```
 
-## agent.py status:
-With most of the maze environment building complete, bar some installation bugs, the Agent class was able to take form.
-agent.py now contains the Experience and ExpereienceBuffer classes which can be used in the training of the CNN. 
-The Agent class now contains code for choosing steps, implementing an epsilon-greedy policy for exploration vs 
-exploitation. With the maze environment taking on most of the functionality of the Agent, we can now focus on the training algorithm, 
-the most exciting part. This will be harder than expected as it requires me to get a good understanding of the pytorch
-Model class and of its tensors. 
+## ```Agent```:
+The agent class is designed to take in action probabilities from the CNN and to take actions according to an epsilon 
+greedy aproach. The epsilon value will be an attribute of the Agent class and decreases as training continues,
+with exploration initially being large such that the agent explores and gives the network new data. After some 
+exploration period, the agent's epsilon value begins decreasing by 10% every 10 episodes. Epsilon is
+given a small lower bound of 0.01.This is so that the agent becomes more reliant on the policy as time goes on 
+and the policy improves, but exploration is still possible. 
+
+So that the CNN did not learn to not step in to walls through penalisation, moves were tested, and the actions that
+put the agent in an invalid state had their corresponding probabilities set to zero. The addition of maze boundaries
+also made this easier as stepping out of the maze still gave an invalid state without the code crashing.
+This was done in the ```test_actions``` function:
+```python    
+        def test_actions(self, action_probabilities):
+        for action in range(4):
+            test_position = self.position + self.action_space[action, :]
+            # Test if new position is a wall (val = -1):
+            if (self.environment[test_position[0], test_position[1]] == -1):
+                action_probabilities[action] = 0
+        normed_probabilities = normalise(action_probabilities)  # Renormalize
+        return (normed_probabilities)
+```
+Note ```normalise``` is a function made so that probabilties are rescaled to still ad to 1 for use in np.random.choice.
+The epsilon-greedy was implemented in the ```choose_action``` function. Here the probabilities are used to select an 
+action using ```np.random.choice``` where they are given as an argument to give the p.m.f of each action. In the 
+cases that exploration is chosed, the policy's action is removed from the possible choices and another action chosen,
+again this is done by setting the P(policy action) to zero and renormalising.
+
+```
+    def choose_action(self, probabilities):
+        # Get policy action:
+        policy_action_label = np.random.choice(self.action_space_labels, p=probabilities)
+        policy_action = self.action_space[policy_action_label]
+        if np.random.uniform(0, 1) < self.epsilon:
+            probabilities[policy_action_label] = 0  # Policy not followed
+            probabilities = normalise(probabilities)  # Renormalize
+            try:
+                random_action_label = np.random.choice(self.action_space_labels,
+                                                       p=probabilities)
+                random_action = self.action_space[random_action_label]
+                return random_action, random_action_label
+            except ValueError:
+                return policy_action, policy_action_label
+        else:
+            return policy_action, policy_action_label
+```
+The exception handling here is used when only one action is possible, therefore the probabilities become 
+(0,0,0,P(policy action)), in this case, if exploration is chosen, the new probabilities would be (0,0,0,0), which
+throws an error in the norm function because of the 0 division, so it is caught.
+
+The epsilon scheme is simple:
+* If in the exploration period epsilon = 1
+* Then decrease epsilon by 10% every 10 episodes
+* When epsilon reaches 0.01, it stays there.
+### agent.py status:
+The agent class is complete.
 
 # gym_maze_package:
 
 In order to make the generated maze from maze_maker a gym-environment for the pytorch library I had to learn to create my own custom 
-environments for OpenAi's Gym package. I did this using A. Poddars article [3]. Following this I have attempted
-to create one with the following file structure, however im still new to making packages so I expect some issues, particularly
-with the use of ```maze_maker.py``` as it is several directories above the maze_env file, the current file structure is:
-``` 
-maze_maker_package:
-  > __innit__
-  > maze_maker.py
-gym_maze_package:
-  >README.md
-  >setup.py
-  >gym_maze:
-    >__init__.py
-    >envs:
-      >maze_env.py
-      >__innit__.py
-```
-
-This is mostly resolved, however I'm now struggling to install the custom environment to the gym package. My reference
-guide [3] suggests using :
-```python 
-pip install -e .
-```
-within the gym_maze file but it isnt working.
+environments for OpenAi's Gym package. I did this using A. Poddars article [3]. Following this, and with some help, I 
+was able to get the maze-env produced, but it took a considerable amount of time. 
 
 ## maze_env:
 
 ```maze_env.py``` requires four functions to be compatible with the pytorch training, specifically:
 1. ```__innit__```:
 ```python
-def __init__(self):
-        # use of np.copy is key to avoiding the differnent state vars being updated
-        self.agent_position = np.asarray([1,1])
-        self.minimum_threshold = -1
-        maze = mm.build_maze(5,5)
-        # rewards map: maze without the agents position marked, shallow copy to stop alterations
-        self.rewards_map = np.copy(maze) 
-        maze[1,1], maze [-2,-2] = 3, 4 # insert agent position and goal position
-        self.original_maze = np.copy(maze) # never edited
-        self.old_state = maze # updated constantly
-        self.state = maze
-        goal_state = np.copy(maze)
-        goal_state[1,1], goal_state[-2,-2] = 0, 3 
-        # copy of maze with agent position at end of maze
-        self.goal_state = goal_state
-        self.done = False
+  def __init__(self):
+      # use of np.copy is key to making shallow copies
+      self.agent_position = np.asarray([1, 1])
+      maze = mm.build_maze()
+      # Insert agent position and goal position.
+      # Can be modified for different RL tasks by changing positions:
+      maze[1, 1], maze[-2, -2] = 3, 4
+      # Create shallow copies:
+      self.original_maze = np.copy(maze)
+      # Create target state, agent at goal position:
+      self.goal_state = np.copy(maze)
+      self.goal_state[1, 1], self.goal_state[-2, -2] = 0, 3
+      self.old_state = np.copy(maze)
+      self.state = np.copy(maze)
+      # Limit steps, speeds up training by stopping very long trajectories
+      self.max_duration = 300
+      self.done = False  # Done flag
 ```
 2. ```step```:
 ```python
-    def step(self, agent_action, agent_score):
-        # calc get rewards etc for state transitions
-        self.old_state = self.state
-        self.state[self.agent_position[0],self.agent_position[1]] = 0  # erase old agent position 3->0
-        self.agent_position += np.asarray(agent_action) # actions written as vectors
-        self.state[self.agent_position[0],self.agent_position[1]] = 3  # flag new agent position x->3
-        self.done = self.is_ep_finished(agent_score)
-        reward = self.calc_reward(self.agent_position) 
-        return ([self.old_state, agent_action, self.state, reward])
+    def step(self, agent_action):
+        self.step_count += 1
+        self.old_state = np.copy(self.state)
+        # Update agent position and state:
+        self.state[self.agent_position[0], self.agent_position[1]] = 0
+        self.agent_position += np.asarray(agent_action)
+        self.state[self.agent_position[0], self.agent_position[1]] = 3
+        self.done, successful = self.is_ep_finished()
+        reward = +10 if successful else -1
+        return ([self.old_state, agent_action, reward, self.done])
 ```
+Shallow copies were invaluable as states are often updated in training, so using np.copy was common.
+Note, a +10 reward was given to agents that found the solution, this is because some trajectories time-out (hit the mx
+step count). But a trajectory that gets to the goal at the max-1, is far better than the one that gets timed out at
+max, but was nowhere near the goal. This was used to encourage the agents to win.
 3. ```reset```:
 ```python
     def reset(self):
-        # reset the env
-        self.state = self.old_state = self.original_maze 
-        self.state[self.agent_position[0],self.agent_position[1]] = 0  # erase old agent position 3->0
-        self.agent_position = np.asarray([1,1])
+        # reset the environment for next episode:
+        self.state = np.copy(self.original_maze)
+        self.agent_position = np.asarray([1, 1])
+        self.step_count = 0
         self.done = False
 ```
 4. ```render```:
@@ -322,34 +370,41 @@ def __init__(self):
         mm.show(self.state, self.agent_position) # print out the maze using matplot.imshow
 ```
 
-Note here that there are some helper functions, ``` is_ep_finsihed``` and ``` calc_reward``` which simply tell us if the
-episode is over and the reward for a given action respectively. I anticipate the env will also need some changes once the 
-aMAZE_ai file is finished. Given the large overlap of the environment methods and  those discussed in the early Agent 
-designs, the Agent class was heavily redesigned.
+A helper function is_ep_finished is also used, it tells us if the trajectory is over and if it was a successful one, 
+returning two bools: ```done``` and ```success```. Print statements are also used to inform the user of episode results.
+Given the large overlap of the environment methods and  those discussed in the early Agent designs, 
+the Agent class was heavily redesigned.
 
-## gym_maze_package status:
-Improvements for the gym_maze_package are mostly at a standstill until I figure out how to get the custom gym environment
-installed to the gym package. But the codes in the gym_env.py are all working and have been tested. The issues with
-importing the maze_maker package from sever directories above the gym_env.py were solved! It was an overall quite fun 
-experience to learn how to configure this environment by solving that issue.
+### gym_maze_package status:
+The gym_maze_package is complete. A further improvement would be introducing an animation to the render function, 
+I looked in to having it show the agents actions in real time, but it got complex and required threading.
 
-# LeNet_package
-
-The vision of this is to create a package that can build a flexible CNN class, that is the CNN adapts to the input size
-of the image, fitting the variable size of the mazes made in maze_maker. There is a lot of code available for making a 
-CNN with pytorch and its been fairly easy to implement. 
-
-## LeNet_package status:
-
-Only need ot add the flexible part and this will be good to go. This package, like the Agent package is purely for
-object creation so should be pretty simple.
+## CNN10
+The goal for a vairable sized CNN architecture was short lived, initially a 32x32 LeNet architecture was used, but
+to keep the task simple, the CNN was made in to a 10x01 single channel architecture. The design here is by far the
+most difficult part, tuning hyperparamters such as kernal size, stride and the overall architecture is very difficult. 
+Often these are found using trial and error, but given the time constraints I was unable to find the working ones.
+The ECNN10 is inherited from the torch.nn.Module class the architecture is as follows:
+```python
+        self.convolutional_1 = nn.Conv2d(1, 1, kernel_size=2, padding=1)
+        self.ReLU_1 = nn.ReLU()
+        self.convolutional_2 = nn.Conv2d(1, 1, kernel_size=2, padding=1)
+        self.ReLU_2 = nn.ReLU()
+        self.fully_connected_in = nn.Linear(in_features=196, out_features=500)
+        self.ReLU_3 = nn.ReLU()
+        self.fully_connected_out = nn.Linear(
+            in_features=500, out_features=num_actions)
+        self.softmax = nn.Softmax(dim=1)
+```
+Softmax was used to convert the outputs to a probability distribution.
+Note that maxpooling was removed, this was becauseit was anticipated that decreasing resolution of the maze would 
+cause too much information loss, making this a Fully Convolutional net. Unfortunately, this is where the most
+doubt lies, as is there is no correct answer for the CNN architecure, only ones that work, and ones that dont.
 
 # cnn_maze_solver.py
 
-This will contain the combination of all the above work to produce the setup for the RL task outlined for this project.
-
 ## cnn_maze_solver.py status:
-The training algorithm for this cant start until I learn the ins and outs of Pytorch's Module and tensor classes.
+The cnn_maze_solver.py file is comlpete.
 
 # Roadmap
 - [x] Design Maze_maker package (:exclamation: introduce pickle to save mazes),
@@ -357,10 +412,10 @@ The training algorithm for this cant start until I learn the ins and outs of Pyt
 - [X] Finish maze_env (:exclamation: installation bug)
 - [x] Build Agent package (now with the new pytorch involvment, this should be made fairly quickly),
 - [x] Build CNN package (:exclamation: use equation in file to make flexible architecture)
-- [ ] Design batch learning algorithm 
-- [ ] Testing:
-  - [ ] Testing is now expected to comprise curriculum learning 
-- [ ] Improve training with the addition of 'elite batches'
+- [x] Design batch learning algorithm 
+- [x] Testing:
+  - [x] Testing is now expected to comprise curriculum learning 
+- [x] Improve training with the addition of 'elite batches'
 
 
 # Similar Work
