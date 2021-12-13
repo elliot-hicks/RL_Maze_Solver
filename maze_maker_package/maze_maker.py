@@ -109,13 +109,14 @@ def show(maze, agent_position):
     """
     maze[-2,-2] = 4 
     maze[agent_position[0],agent_position[1]] = 3 
-    plt.axis('off')
+    #plt.axis('off')
     plt.imshow(maze) 
     
-def build_maze(width=28,height=28):
+def build_maze(width=10,height=10):
     maze_frame = np.zeros((height,width))
     maze_init = recursive_maze(maze_frame)
     maze = -1* finalise_maze(maze_init) #insert reward for being in forbidden state 
     maze[-2,-2] = +1 # insert rewards for being in goal state
     return maze
+
   

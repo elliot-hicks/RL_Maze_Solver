@@ -1,0 +1,7 @@
+#.gitignore_file
+
+#ignore the following files:
+/agent_package/__pychache__
+/CNN10/__pycache__
+/gym_maze_pacakge/gym_maze.egg-info
+/maze_maker_package/__pycache__
