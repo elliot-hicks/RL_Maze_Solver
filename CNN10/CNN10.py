@@ -37,7 +37,7 @@ class ECNN10(torch.nn.Module):
         self.ReLU_1 = nn.ReLU()
         self.convolutional_2 = nn.Conv2d(1, 1, kernel_size=2, padding=1)
         self.ReLU_2 = nn.ReLU()
-        self.fully_connected_in = nn.Linear(in_features=196, out_features=300)
+        self.fully_connected_in = nn.Linear(in_features=196, out_features=500)
         self.ReLU_3 = nn.ReLU()
         self.fully_connected_out = nn.Linear(
             in_features=500, out_features=num_actions)
@@ -62,7 +62,6 @@ class ECNN10(torch.nn.Module):
         x = self.convolutional_2(x)
         x = self.ReLU_2(x)
         x = flatten(x, 1)
-        x = self.fully_connected_in1(x)
         x = self.ReLU_3(x)
         x = self.fully_connected_in(x)
         x = self.ReLU_3(x)
