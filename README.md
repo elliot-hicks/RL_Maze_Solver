@@ -473,6 +473,9 @@ shows it was a very simple situation. However, there is again evidence of learni
 <p align="center">
   <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png">
 </p>
+The steps functions are often very noisey and red herrings are common, often after 500 episodes, the CNN would stop finding the solution.
+Again the main issue here is instability. It was attempted to use an empty maze as a form of curriculum learning, however,
+the training was still unstable and sometimes the agent would stop solving the maze at all.
 
 # Roadmap
 - [x] Design Maze_maker package,
@@ -485,6 +488,11 @@ shows it was a very simple situation. However, there is again evidence of learni
   - [x] Testing is now expected to comprise curriculum learning,
 - [x] Improve training with the addition of 'elite batches'
 
+# Incompleted Parts
+There were plans to add pickle so that users can save/load CNN parameters and mazes. However, the issues with 
+getting the gym environment, learning the theory behind RL and learning to use PyTorch took a lot of time. Most
+importantly, trying to fix the instability in the training took a lot of time at the end of the project. Given more time
+the user functions would be completed.
 
 # Similar Work
 
