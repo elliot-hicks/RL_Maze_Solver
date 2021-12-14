@@ -450,7 +450,10 @@ The cnn_maze_solver.py file is comlpete.
 
 ## CNN_maze_solver performance:
 
-The cnn_maze_solver.py appears to work occassionally, training is very unstable, but when forced in to a very simple situation
+**The cnn_maze_solver has been loaded with hyperparams that make training faster for you when running it.**
+
+
+The cnn_maze_solver.py appears to work occasionally, training is very unstable, but when forced in to a very simple situation
 the agent does learn, however it is far too slow to be useful considering we are only working with 10x10 mazes. I believe
 its likely due to the hyperparameters and architecture of the CNN being used. Given more time I would be able to 
 further test different combinations of the parameters such as:
