@@ -475,7 +475,16 @@ shows it was a very simple situation. However, there is again evidence of learni
 </p>
 The steps functions are often very noisey and red herrings are common, often after 500 episodes, the CNN would stop finding the solution.
 Again the main issue here is instability. It was attempted to use an empty maze as a form of curriculum learning, however,
-the training was still unstable and sometimes the agent would stop solving the maze at all.
+the training was still unstable and sometimes the agent would stop solving the maze at all. Given the algorithms failure
+to optimise the paths, the variables created were called best_episode rather than optimal. In order to still be able
+to show a visual representation of the work, the states in the best episode were animated and plotted in the 
+```animate_imshow``` function. This shows the best episode seen in the training process,but it likely will be found
+using exploration more than exploitation.
+
+
+
+I was very disappointed to
+see this project fail to solve these tasks, I will continue working on it in my spare time though. 
 
 # Roadmap
 - [x] Design Maze_maker package,
@@ -492,7 +501,7 @@ the training was still unstable and sometimes the agent would stop solving the m
 There were plans to add pickle so that users can save/load CNN parameters and mazes. However, the issues with 
 getting the gym environment, learning the theory behind RL and learning to use PyTorch took a lot of time. Most
 importantly, trying to fix the instability in the training took a lot of time at the end of the project. Given more time
-the user functions would be completed.
+the user functions would be completed. 
 
 # Similar Work
 
