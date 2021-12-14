@@ -56,7 +56,7 @@ Required Packages:
 * **NumPy**
 * **Random**
 * **Matplotlib.pyplot**
-* **maze_maker**:
+* **maze_maker_package**:
 * **gym_maze_package**
 * **CNN10**
 * **agent_package**
@@ -413,7 +413,7 @@ any step not resulting in the goal state, and +10 for a step that does. The trai
 * train the CNN using ```train()```
 The loss function used in this model is:
 <p align="center">
-  <img width="200" height="100" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
+  <img width="300" height="100" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
 </p>
 (Above created using codecogs).
 
@@ -518,9 +518,9 @@ One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](http
 4. R.J.Williams, 'Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning', 1992, [REINFORCE](https://link.springer.com/article/10.1023/A:1022672621406)
 # Comments/ Questions:
 
-1. Given the size of this README.md growing so fast, should I start splitting this in to smaller readme files within the correspoding packages and retain this as a broader overview of the project? I want to make sure I'm following the 'style' used in github.
-2. I know one of the criterion is good use of github, could you let me know what you think of my use so far? Im enjoying it, the more I use it the faster I can build up this project. I did have some issues where I lost file histories because I was forced to change their names. 
-
+1. We spoke about changing the ugly package names, but when going back through the gym_maze installation I saw again
+how confusing it can be when installing if the folders have very similar names, so i decided to keep them I understand
+its clunky but I thought it easier to explain the installation with the current package names. CNN10 got a better name.
 ## Contact
 
 :email: Email: [ppxeh1@nottingham.ac.uk](mailto:ppxeh1@nottingham.ac.uk)
