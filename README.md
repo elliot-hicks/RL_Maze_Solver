@@ -483,8 +483,8 @@ The steps functions are often very noisey and red herrings are common, often aft
 Again the main issue here is instability. It was attempted to use an empty maze as a form of curriculum learning, however,
 the training was still unstable and sometimes the agent would stop solving the maze at all. Given the algorithms failure
 to optimise the paths, the variables created were called best_episode rather than optimal. In order to still be able
-to show a visual representation of the work, the states in the best episode were animated and plotted in the 
- ```animate_imshow``` function. This shows the best episode seen in the training process,but it likely will be found
+to show a visual representation of the work, the states in the best episode were animated and plotted in the
+animate_imshow function. This shows the best episode seen in the training process,but it likely will be found
 using exploration more than exploitation.
 
 
