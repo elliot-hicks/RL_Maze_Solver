@@ -217,7 +217,9 @@ def random_sample_batch(self, batch_size = 100):
         return batch
 ```
 There is also an ```python update_values``` function which rewrites the rewards column of the experience buffer for the
-last N steps, where N is the length of the last episode.
+last N steps, where N is the length of the last episode. Notably, operator overloading was introduced for the
+ExperienceBuffer, this greatly improved the readability of the code I didnt have to write 
+agent.replay_buffer.memory_buffer[index].
 
 ## ```EliteExperienceBuffer```:
 In order to improve training of the CNN, many training regimens employ an 'elite buffer', a buffer of transitons/experiences
@@ -308,7 +310,7 @@ The epsilon scheme is simple:
 * Then decrease epsilon by 10% every 10 episodes
 * When epsilon reaches 0.01, it stays there.
 ### agent.py status:
-The agent class is complete.
+The agent.py file is finished, all classes are complete.
 
 # gym_maze_package:
 
