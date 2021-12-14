@@ -105,7 +105,7 @@ Key functions:
   * each quadrant then is treated as a maze and fed back in to function this recursively builds up the maze
 
 * Returns:
-    * maze NumPy array that descibes the maze as a matrix of ints:
+    * maze NumPy array that describes the maze as a matrix of ints:
     * 0 = steppable space
     * 1 = wall
     * 2 = vertical gate (hole in vertical wall)
@@ -118,13 +118,13 @@ Key functions:
 
   * maze (2D NumPy array): Sometimes added walls obstruct gates, so we use the encoding
     from the recursive maze generator to find gates and clear space 
-    around them as necessary. Final prodcut is a maze where all points
+    around them as necessary. Final product is a maze where all points
     are accessible.
 
 * Returns
 
   * maze (2D NumPy array): returns finalised array
-  * Code snipppet below shows the process of removing obstructions around gates
+  * Code snippet below shows the process of removing obstructions around gates
     * gates in horizontal walls (value = 2) must have the entrance cleared above, below and inside gate.
     * gates in vertical walls (value = 3) must have the entrance cleared left, right and inside gate.
   * this final step made the code much more readable as introducing obstruction clearing in the maze generator made the code undreadable.
@@ -160,7 +160,7 @@ def show(maze):
 
 
 ## maze_maker Status:
-The maze_maker file is now finished. Unfortunately, an appication of pickle was not completed due to comlpications in 
+The maze_maker file is now finished. Unfortunately, an application of pickle was not completed due to complications in 
 other parts of the project.
 All possible improvements are listed below:
 1. Add pickle or start using seeds, veering towards use of pickle so we could also save NN parameters.
@@ -277,11 +277,11 @@ This was done in the ```test_actions``` function:
         normed_probabilities = normalise(action_probabilities)  # Renormalize
         return (normed_probabilities)
 ```
-Note ```normalise``` is a function made so that probabilties are rescaled to still ad to 1 for use in np.random.choice.
+Note ```normalise``` is a function made so that probabilities are rescaled to still ad to 1 for use in np.random.choice.
 The epsilon-greedy was implemented in the ```choose_action``` function. Here the probabilities are used to select an 
 action using ```np.random.choice``` where they are given as an argument to give the p.m.f of each action. In the 
-cases that exploration is chosed, the policy's action is removed from the possible choices and another action chosen,
-again this is done by setting the P(policy action) to zero and renormalising.
+cases that exploration is chosen, the policy's action is removed from the possible choices and another action chosen,
+again this is done by setting the P(policy action) to zero and normalising.
 
 ```
     def choose_action(self, probabilities):
@@ -383,9 +383,9 @@ The gym_maze_package is complete. A further improvement would be introducing an 
 I looked in to having it show the agents actions in real time, but it got complex and required threading.
 
 ## CNN10
-The goal for a vairable sized CNN architecture was short lived, initially a 32x32 LeNet architecture was used, but
+The goal for a variable sized CNN architecture was short-lived, initially a 32x32 LeNet architecture was used, but
 to keep the task simple, the CNN was made in to a 10x01 single channel architecture. The design here is by far the
-most difficult part, tuning hyperparamters such as kernal size, stride and the overall architecture is very difficult. 
+most difficult part, tuning hyperparamters such as kernel size, stride and the overall architecture is very difficult. 
 Often these are found using trial and error, but given the time constraints I was unable to find the working ones.
 The ECNN10 is inherited from the torch.nn.Module class the architecture is as follows:
 ```python
@@ -400,9 +400,9 @@ The ECNN10 is inherited from the torch.nn.Module class the architecture is as fo
         self.softmax = nn.Softmax(dim=1)
 ```
 Softmax was used to convert the outputs to a probability distribution.
-Note that maxpooling was removed, this was becauseit was anticipated that decreasing resolution of the maze would 
+Note that maxpooling was removed, this was because it was anticipated that decreasing resolution of the maze would 
 cause too much information loss, making this a Fully Convolutional net. Unfortunately, this is where the most
-doubt lies, as is there is no correct answer for the CNN architecure, only ones that work, and ones that dont.
+doubt lies, as is there is no correct answer for the CNN architecture, only ones that work, and ones that dont.
 
 ## cnn_maze_solver.py
 This file contains the training algorithm for the project and code for making an animation of the best route achieved
@@ -419,12 +419,12 @@ The loss function used in this model is:
 </p>
 (Above created using codecogs).
 
-This corresponds to a zero-bias value approximation as seen in the REINFORCE paper. Here i indexs over the random batch
+This corresponds to a zero-bias value approximation as seen in the REINFORCE paper. Here i indexes over the random batch
 taken from the agent memory buffers. This method of random sampling is supposed to improve stability in training.
-The loss is back-propagated using the usual PyTorch functions: optimiser.zero_grad, loss.backward, optimser.step.
+The loss is back-propagated using the usual PyTorch functions: optimiser.zero_grad, loss.backward, optimiser.step.
 The training code is too long to be shown here but is available in full in the cnn_maze_solver.py file. 
 The CNN is trained every 5 episodes using the main memory buffer, and every 10 episodes with the elite buffer, once the
-exploration period has concluded. The number of episodes ran can be changed in the maze_solverfunction, it is
+exploration period has concluded. The number of episodes ran can be changed in the maze_solver function, it is
 recommended that the memory buffer size is less than exploration_period*max_steps, such that the exploration period
 is fully utilised, this can be tuned either way but I recommend setting the exploration period by hand depending on 
 the maze size. The same applies for the max_steps as more difficult mazes will require more steps.
@@ -440,7 +440,7 @@ the agent completes the maze: SUCCESS, and when it fails: TIMED OUT.
 Several diagnostic lists are made, including 
 * episode_steps : Number of steps in each episode during the training
 * episode_av_reward: Average reward along each episode
-* shortest_length: The length of the best route, found using min(episdode_steps)
+* shortest_length: The length of the best route, found using min(episode_steps)
 * best_episode: The episode which corresponds to the best solution, found using np.argmin(episode_steps)
 
 These can be used to determine if the CNN is improving:
@@ -501,7 +501,7 @@ I was very disappointed to see this project fail to solve these tasks, I will co
   - [x] Testing is now expected to comprise curriculum learning,
 - [x] Improve training with the addition of 'elite batches'
 
-# Incompleted Parts
+# Incomplete Parts
 There were plans to add pickle so that users can save/load CNN parameters and mazes. However, the issues with 
 getting the gym environment, learning the theory behind RL and learning to use PyTorch took a lot of time. Most
 importantly, trying to fix the instability in the training took a lot of time at the end of the project. Given more time
