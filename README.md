@@ -67,11 +67,11 @@ Required Packages:
 In order to install maze_gym to create the custom gym environment, maze_maker must first be installed using pip install
 in the maze_maker_package directory:
 ```shell
-...\maze_maker_package>pip install -e . maze_maker
+...\maze_maker_package>pip install -e .
 ```
 Following this, the gym-maze package can be installed using the following in the gym_maze_package directory:
 ```shell
-...\gym_maze_package>pip install -e .gym_maze
+...\gym_maze_package>pip install -e .
 ```
 
 # Usage
