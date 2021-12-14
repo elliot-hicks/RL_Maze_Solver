@@ -413,15 +413,16 @@ any step not resulting in the goal state, and +10 for a step that does. The trai
 * train the CNN using ```train()```
 The loss function used in this model is:
 <p align="center">
-  <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
+  <img width="200" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
 </p>
 (Above created using codecogs).
+
 This corresponds to a zero-bias value approximation as seen in the REINFORCE paper. Here i indexs over the random batch
 taken from the agent memory buffers. This method of random sampling is supposed to improve stability in training.
-The loss is backpropagated using the usual PyTorch functions, ```optimiser.zero_grad, loss.backward, optimser.step```.
-The training code is too long to be shown here but is avaiable in full in the ```cnn_maze_solver.py``` file. 
+The loss is back-propagated using the usual PyTorch functions: optimiser.zero_grad, loss.backward, optimser.step.
+The training code is too long to be shown here but is available in full in the cnn_maze_solver.py file. 
 The CNN is trained every 5 episodes using the main memory buffer, and every 10 episodes with the elite buffer, once the
-exploration period has concluded. The number of episoded ran can be changed in the ```maze_solver``` function, it is
+exploration period has concluded. The number of episodes ran can be changed in the maze_solverfunction, it is
 recommended that the memory buffer size is less than exploration_period*max_steps, such that the exploration period
 is fully utilised, this can be tuned either way but I recommend setting the exploration period by hand depending on 
 the maze size. The same applies for the max_steps as more difficult mazes will require more steps.
@@ -478,13 +479,11 @@ Again the main issue here is instability. It was attempted to use an empty maze 
 the training was still unstable and sometimes the agent would stop solving the maze at all. Given the algorithms failure
 to optimise the paths, the variables created were called best_episode rather than optimal. In order to still be able
 to show a visual representation of the work, the states in the best episode were animated and plotted in the 
-```animate_imshow``` function. This shows the best episode seen in the training process,but it likely will be found
+ ```animate_imshow``` function. This shows the best episode seen in the training process,but it likely will be found
 using exploration more than exploitation.
 
 
-
-I was very disappointed to
-see this project fail to solve these tasks, I will continue working on it in my spare time though. 
+I was very disappointed to see this project fail to solve these tasks, I will continue working on it in my spare time though. 
 
 # Roadmap
 - [x] Design Maze_maker package,
