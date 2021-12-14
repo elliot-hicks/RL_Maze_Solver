@@ -413,7 +413,7 @@ any step not resulting in the goal state, and +10 for a step that does. The trai
 * train the CNN using ```train()```
 The loss function used in this model is:
 <p align="center">
-  <img width="200" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
+  <img width="200" height="100" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/CodeCogsEqn.gif">
 </p>
 (Above created using codecogs).
 
