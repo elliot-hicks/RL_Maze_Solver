@@ -521,8 +521,9 @@ One example I saw used the simpleai A* algorithm so solve mazes: [simpleai](http
 # Comments/ Questions:
 
 1. We spoke about changing the ugly package names, but when going back through the gym_maze installation I saw again
-how confusing it can be when installing if the folders have very similar names, so i decided to keep them I understand
-its clunky but I thought it easier to explain the installation with the current package names. CNN10 got a better name.
+how confusing it can be when installing if the folders have very similar names, so i decided to keep them. I understand
+its clunky but I thought it easier to explain the installation with the current package names. CNN10 got a better name though!
+2. I would really appreciate feedback on the environment requirements file, this is the only remaining component I'm unsure about and am sure I'll need it later in my career.
 ## Contact
 
 :email: Email: [ppxeh1@nottingham.ac.uk](mailto:ppxeh1@nottingham.ac.uk)
