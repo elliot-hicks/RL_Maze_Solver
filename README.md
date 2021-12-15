@@ -479,7 +479,7 @@ shows it was a very simple situation. However, there is again evidence of learni
 <p align="center">
   <img width="600" height="400" src="https://github.com/mpags-python/coursework2021-sub3-elliot-hicks/blob/main/example_very_simple_learning.png">
 </p>
-The steps functions are often very noisey and red herrings are common, often after 500 episodes, the CNN would stop finding the solution.
+The steps functions are often very noisy and red herrings are common, often after 500 episodes, the CNN would stop finding the solution.
 Again the main issue here is instability. It was attempted to use an empty maze as a form of curriculum learning, however,
 the training was still unstable and sometimes the agent would stop solving the maze at all. Given the algorithms failure
 to optimise the paths, the variables created were called best_episode rather than optimal. In order to still be able
