@@ -73,7 +73,7 @@ Following this, the gym-maze package can be installed using the following in the
 ```shell
 ...\gym_maze_package>pip install -e .
 ```
-
+Note that an env_requirements file has been uploaded. I found this a confusing part of the submission, I attempted to clean it but was unsure how to do it safely. An environemnt was uploaded regardless as it is an important part. In the case that this doesnt work, I hope the information provided above will be an adequate supplement.
 # Usage
 # maze_maker_package
 
