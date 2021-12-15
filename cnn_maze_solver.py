@@ -196,7 +196,7 @@ def maze_solver():
     ADAM = torch.optim.Adam(model.parameters(), lr=learning_rate)
     steps = train(maze_env,
                   model,
-                  number_of_episodes=200,
+                  number_of_episodes=100,
                   discount_factor=0.95,
                   optimiser=ADAM)
 
